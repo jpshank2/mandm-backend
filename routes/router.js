@@ -9,6 +9,7 @@ const OfficeSendMail = require('./checkout/sendmail.js')
 const MandM = require("./mandm/dashboard.js")
 const MandMOther = require("./mandm/other.js")
 const Serial = require("./serial/serial.js");
+const Bingo = require("./bingo/call.js")
 
 // router.get("/", (req, res) => {
 //     res.send("nice")
@@ -150,6 +151,10 @@ router.post("/serial/sp4", (req, res) => {
 
 router.post("/serial/splt", (req, res) => {
     Serial.LT_POST(req, res)
+})
+
+router.get("/bingo", (req, res) => {
+    Bingo.BASE(req, res)
 })
 
 module.exports = router;
