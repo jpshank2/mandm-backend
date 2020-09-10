@@ -157,4 +157,12 @@ router.get("/bingo", (req, res) => {
     Bingo.BASE(req, res)
 })
 
+router.get("/bingo/called", (req, res) => {
+    Bingo.DATES(req, res)
+})
+
+router.post("/bingo", (req, res) => {
+    Bingo.POST(req, res)
+})
+
 module.exports = router;

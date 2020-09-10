@@ -1,4 +1,5 @@
 const sql = require("mssql");
+const SendMail = require("./sendmail.js")
 
 
 const config = {
@@ -17,13 +18,42 @@ const BASE = (req, res) => {
         request.query(`SELECT DISTINCT BingoNumber
                         FROM dbo.Bingo
                         WHERE BingoCalled !=1`, (err, recordset) => {
-                            if (err) {console.log(err); console.log("call.js error")}
+                            if (err) {console.log(err); console.log("call.js base error")}
                             let selection = Math.floor(Math.random() * recordset.recordsets[0].length)
                             res.send(recordset.recordsets[0][selection])
                         })
                     })
 }
 
+const DATES = (req, res) => {
+    sql.connect(config, () => {
+        let request = new sql.Request()
+        request.query(`SELECT DISTINCT BingoDate, BingoNumber
+                        FROM dbo.Bingo
+                        WHERE BingoDate IS NOT NULL`, (err, recordset) => {
+                            if (err) {console.log(err); console.log("call.js dates error")}
+                            res.send(recordset.recordsets[0])
+                        })
+                    })
+}
+
+const POST = (req, res) => {
+    sql.connect(config, () => {
+        let request = new sql.Request()
+        request.query(`UPDATE dbo.Bingo
+                        SET BingoCalled = 1, BingoDate = CURRENT_TIMESTAMP
+                        WHERE BingoNumber = ${req.body.number}`, (err, recordset) => {
+                            if (err) {
+                                console.log(err)
+                                console.log("call.js post error")
+                            }
+                            SendMail.EMAIL(req.body.number)
+                        })
+    })
+}
+
 module.exports = {
-    BASE: BASE
+    BASE: BASE,
+    DATES: DATES,
+    POST: POST
 }
