@@ -50,16 +50,25 @@ let EMAIL = number => {
 
                                 transporter.sendMail({
                                     from: process.env.EM_USER,
-                                    to: email.StaffEMail,
-                                    bcc: 'jeremyshank@bmss.com',
+                                    to: 'jeremyshank@bmss.com',//email.StaffEMail,
                                     subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
-                                    html: `<p>This is Jeremy testing Bingo</p>`
+                                    html: `<p>Remember to enter your time for today!</p><p>should go to ${email.StaffEMail}</p>`
                                 })
                             })
                         })
                     })
 }
 
+let WINNER = name => {
+    transporter.sendMail({
+        from: process.env.EM_USER,
+        to: 'jeremyshank@bmss.com',//'bingo@bmss.com',
+        subject: `${name} Won Bingo!`,
+        html: `<p>${name} has won this round of Bingo. We start a new game tomorrow!</p>`
+    })
+}
+
 module.exports = {
-    EMAIL: EMAIL
+    EMAIL: EMAIL,
+    WINNER: WINNER
 }

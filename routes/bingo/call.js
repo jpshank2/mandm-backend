@@ -1,5 +1,6 @@
 const sql = require("mssql");
 const SendMail = require("./sendmail.js")
+const CheckWin = require("./checkwin.js")
 
 
 const config = {
@@ -48,6 +49,7 @@ const POST = (req, res) => {
                                 console.log("call.js post error")
                             }
                             SendMail.EMAIL(req.body.number)
+                            CheckWin.BASE()
                         })
     })
 }
