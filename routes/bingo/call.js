@@ -49,7 +49,9 @@ const POST = (req, res) => {
                                 console.log("call.js post error")
                             }
                             SendMail.EMAIL(req.body.number)
-                            CheckWin.BASE()
+                            setTimeout(() => {
+                                CheckWin.BASE()
+                            }, 10000)
                         })
     })
 }
