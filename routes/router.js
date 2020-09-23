@@ -154,6 +154,10 @@ router.post("/serial/splt", (req, res) => {
 })
 
 router.get("/bingo", (req, res) => {
+    res.sendFile(__dirname + '/views/bingo.html')
+})
+
+router.get("/bingo/number", (req, res) => {
     Bingo.BASE(req, res)
 })
 
@@ -161,8 +165,12 @@ router.get("/bingo/called", (req, res) => {
     Bingo.DATES(req, res)
 })
 
-router.post("/bingo", (req, res) => {
+router.post("/bingo/number", (req, res) => {
     Bingo.POST(req, res)
+})
+
+router.post("/bingo/reset", (req, res) => {
+    Bingo.RESET(req, res)
 })
 
 module.exports = router;

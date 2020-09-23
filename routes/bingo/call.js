@@ -56,8 +56,22 @@ const POST = (req, res) => {
     })
 }
 
+const RESET = (req, res) => {
+    sql.connect(config, () => {
+        let request = new sql.Request()
+        request.query(`UPDATE dbo.Bingo
+                        SET BingoCalled = 0, BingoDate = NULL, BingoMissed = 0
+                        WHERE BingoNumber != 0`, (err, recordset) => {
+                            if (err) {
+                                console.log(err);console.log("call.js reset error")
+                            }
+                        })
+    })
+}
+
 module.exports = {
     BASE: BASE,
     DATES: DATES,
-    POST: POST
+    POST: POST,
+    RESET: RESET
 }

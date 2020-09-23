@@ -16,7 +16,7 @@ const GETOFFICES = (req, res) => {
         let request = new sql.Request();
         request.query(`SELECT DISTINCT Name, Location, Site, CONVERT(INT, SUBSTRING(Name, 22, 2)) AS Number
         FROM dbo.OpenOffices
-        WHERE Name LIKE 'Upstairs Workstation%'
+        WHERE Name LIKE 'Upstairs%'
         ORDER BY Number ASC;`, (err, recordset) => {
             if (err) {
                 console.log(err)
