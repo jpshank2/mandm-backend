@@ -8,6 +8,7 @@ const OfficeCheckOut = require('./checkout/checkout.js')
 const OfficeSendMail = require('./checkout/sendmail.js')
 const MandM = require("./mandm/dashboard.js")
 const MandMOther = require("./mandm/other.js")
+const RandomKUDOS = require("./mandm/random.js")
 const Serial = require("./serial/serial.js");
 const Bingo = require("./bingo/call.js")
 
@@ -135,6 +136,14 @@ router.get("/mandm/:id", (req, res) => {
 
 router.post("/mandm/other", (req, res) => {
     MandMOther.POST(req, res)
+})
+
+router.get("/kudos/:cornerstone", (req, res) => {
+    RandomKUDOS.BASE(req, res)
+})
+
+router.get("/kudos", (req, res) => {
+    res.sendFile(__dirname + "/view/kudos.html")
 })
 
 router.get("/serial", (req, res) => {

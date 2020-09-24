@@ -1,7 +1,18 @@
 const sql = require("mssql");
+const CronJob = require('cron').CronJob
 const SendMail = require("./sendmail.js")
 const CheckWin = require("./checkwin.js")
 
+const job = new CronJob(
+    '00 30 14 * * 1-5', () => {
+        CheckWin.BASE()
+    },
+    null,
+    false,
+    'America/Chicago'
+)
+
+job.start()
 
 const config = {
     user: process.env.DV_DB_USER,
@@ -49,9 +60,6 @@ const POST = (req, res) => {
                                 console.log("call.js post error")
                             }
                             SendMail.EMAIL(req.body.number)
-                            setTimeout(() => {
-                                CheckWin.BASE()
-                            }, 10000)
                         })
     })
 }

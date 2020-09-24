@@ -12,6 +12,22 @@ const config = {
     }
 }
 
+let pooledTransporter = nodemailer.createTransport({
+    pool: true,
+    host: "smtp.office365.com",
+    port: 587,
+    secure: false,
+    auth: {
+        user: process.env.EM_USER,
+        pass: process.env.EM_PASS
+    },
+    tls: {
+        rejectUnauthorized: false
+    },
+    maxMessages: 3,
+    maxConnections: 3
+})
+
 let transporter = nodemailer.createTransport({
     host: "smtp.office365.com",
     port: 587,
@@ -33,6 +49,9 @@ let EMAIL = number => {
                         INNER JOIN dbo.tblStaff S ON B.BingoCard = StaffBingo
                         WHERE BingoNumber = ${number}`, (err, recordset) => {
                             if (err) {console.log(err); console.log("bingo sendmail.js draw error")}
+
+                            let messages = []
+
                             recordset.recordsets[0].forEach((email) => {
                                 let letter
                                 let diff = number - 15
@@ -48,13 +67,19 @@ let EMAIL = number => {
                                     letter = 'O'
                                 }
 
-                                transporter.sendMail({
+                                let message = {
                                     from: process.env.EM_USER,
-                                    to: 'jeremyshank@bmss.com',//email.StaffEMail,
+                                    to: 'jeremyshank@bmss.com',//email.StaffEMail
                                     subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
                                     html: `<p>Remember to enter your time for today!</p><p>should go to ${email.StaffEMail}</p>`
-                                })
+                                }
+
+                                messages.push(message)
                             })
+
+                            while(messages.length) {
+                                pooledTransporter.sendMail(messages.shift())
+                            }
                         })
                     })
 }
