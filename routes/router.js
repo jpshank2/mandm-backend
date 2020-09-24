@@ -143,7 +143,7 @@ router.get("/kudos/:cornerstone", (req, res) => {
 })
 
 router.get("/kudos", (req, res) => {
-    res.sendFile(__dirname + "/view/kudos.html")
+    res.sendFile(__dirname + "/views/kudos.html")
 })
 
 router.get("/serial", (req, res) => {
