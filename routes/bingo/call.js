@@ -60,7 +60,6 @@ const POST = (req, res) => {
                                 console.log(err)
                                 console.log("call.js post error")
                             }
-                            SendMail.CHECK(req.body.number)
                             SendMail.EMAIL(req.body.number)
                         })
     })

@@ -52,7 +52,7 @@ let EMAIL = number => {
 
                             let messages = []
 
-                            recordset.recordsets[0].forEach((email) => {
+                            recordset.recordsets[0].forEach((email, index) => {
                                 let letter
                                 let diff = number - 15
                                 if (diff <= 0) {
@@ -67,14 +67,27 @@ let EMAIL = number => {
                                     letter = 'O'
                                 }
 
-                                let message = {
-                                    from: process.env.EM_USER,
-                                    to: email.StaffEMail,
-                                    subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
-                                    html: `<p>Remember to enter your time for yesterday by noon today!</p>`
+                                let message
+
+                                if (index === 0) {
+                                    message = {
+                                        from: process.env.EM_USER,
+                                        to: email.StaffEMail,
+                                        bcc: 'kmoore@bmss.com, jeremyshank@bmss.com',
+                                        subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
+                                        html: `<p>Remember to enter your time for yesterday by noon today!</p>`
+                                    }    
+                                } else {
+                                    message = {
+                                        from: process.env.EM_USER,
+                                        to: email.StaffEMail,
+                                        subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
+                                        html: `<p>Remember to enter your time for yesterday by noon today!</p>`
+                                    }
                                 }
 
                                 messages.push(message)
+                                
                             })
 
                             while(messages.length) {
