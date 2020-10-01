@@ -69,9 +69,9 @@ let EMAIL = number => {
 
                                 let message = {
                                     from: process.env.EM_USER,
-                                    to: 'jeremyshank@bmss.com',//email.StaffEMail
+                                    to: email.StaffEMail,
                                     subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
-                                    html: `<p>Remember to enter your time for today!</p><p>should go to ${email.StaffEMail}</p>`
+                                    html: `<p>Remember to enter your time for yesterday by noon today!</p>`
                                 }
 
                                 messages.push(message)
@@ -84,10 +84,33 @@ let EMAIL = number => {
                     })
 }
 
+let CHECK = number => {
+    let letter
+    let diff = number - 15
+    if (diff <= 0) {
+        letter = 'B'
+    } else if (diff > 0 && diff <= 15) {
+        letter = 'I'
+    } else if (diff > 15 && diff <= 30) {
+        letter = 'N'
+    } else if (diff > 30 && diff <= 45) {
+        letter = 'G'
+    } else {
+        letter = 'O'
+    }
+    transporter.sendMail({
+        from: process.env.EM_USER,
+        to: 'kmoore@bmss.com',
+        cc: 'jeremyshank@bmss.com',
+        subject: `Lynn has called a Bingo number today`,
+        html: `<p>Today's number was ${letter} ${number}</p>`
+    })
+}
+
 let WINNER = name => {
     transporter.sendMail({
         from: process.env.EM_USER,
-        to: 'jeremyshank@bmss.com',//'bingo@bmss.com',
+        to: 'bingo@bmss.com',
         subject: `${name} Won Bingo!`,
         html: `<p>${name} has won this round of Bingo. We start a new game tomorrow!</p>`
     })
@@ -95,5 +118,6 @@ let WINNER = name => {
 
 module.exports = {
     EMAIL: EMAIL,
-    WINNER: WINNER
+    WINNER: WINNER,
+    CHECK: CHECK
 }

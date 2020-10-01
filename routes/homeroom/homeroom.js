@@ -14,6 +14,7 @@ const devConfig = {
 }
 
 const BASE = (req, res) => {
+     
     sql.connect(devConfig, () => {
         let name
 

@@ -12,6 +12,7 @@ const config = {
 }
 
 const POST = (req, res) => {
+     
     sql.connect(config, () => {
         let request = new sql.Request()
         let patt = /.'/g

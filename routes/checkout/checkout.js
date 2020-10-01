@@ -12,6 +12,7 @@ const config = {
 }
 
 const GETOFFICES = (req, res) => {
+     
     sql.connect(config, () => {
         let request = new sql.Request();
         request.query(`SELECT DISTINCT Name, Location, Site, CONVERT(INT, SUBSTRING(Name, 22, 2)) AS Number
@@ -28,6 +29,7 @@ const GETOFFICES = (req, res) => {
 }
 
 const THISOFFICE = (req, res) => {    
+     
     let id = req.params.id
     let patt = /_/g
     id = id.replace(patt, " ")
@@ -40,8 +42,8 @@ const THISOFFICE = (req, res) => {
         ,StandUp
         ,Site
         ,Location
-        ,CheckedIn
-        ,CheckedOut
+        ,CONVERT(datetime, [CheckedIn], 120) AS CheckedIn
+        ,CONVERT(DATETIME, [CheckedOut], 120) AS CheckedOut
         ,ImagePath
         FROM dbo.OpenOffices
         INNER JOIN dbo.tblStaff S ON EmployeeID = S.StaffIndex
@@ -67,7 +69,7 @@ const CHECKOUT = (req, res) => {
         SET @employee = (SELECT StaffIndex FROM dbo.tblStaff WHERE StaffEmail = '${email}')
         
         INSERT INTO dbo.OpenOffices (Name, Location, Site, StandUp, CheckedOut, CheckedIn, EmployeeID, ImagePath)
-        VALUES ('${name}', '${location}', '${site}', ${standUp}, '${checkedOut}', '${checkedIn}', @employee, '${image}');`, 
+        VALUES ('${name}', '${location}', '${site}', ${standUp}, CONVERT(DATETIME, '${checkedOut}', 120), CONVERT(DATETIME,'${checkedIn}', 120), @employee, '${image}');`, 
         (err, recordset) => {
             if (err) {
                 console.log(err)

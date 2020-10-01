@@ -15,6 +15,7 @@ const config = {
 //
 
 let POST = (req, checked) => {
+     
     
     sql.on("error", err => {
         console.log(err)
@@ -47,6 +48,7 @@ let POST = (req, checked) => {
 //
 
 let MPOST = (req) => {
+     
     sql.connect(config, () => {
         let request = new sql.Request()
         request.query(`DECLARE @staffIndex int
@@ -71,6 +73,7 @@ let MPOST = (req) => {
 //
 
 let TMEMPOST = (req) => {
+     
     if (req.body.memberChecked === 1) {
         sql.connect(config, () => {
             let request = new sql.Request()

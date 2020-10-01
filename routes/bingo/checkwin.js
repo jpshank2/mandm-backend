@@ -20,13 +20,18 @@ const BASE = () => {
                             if (err) {console.log(err); console.log("checkwin.js base cardRequest error")}
                             recordset.recordsets[0].forEach(card => {
                             let tilesRequest = new sql.Request()
-                            tilesRequest.query(`SELECT BingoNumber, 
-                                                    BingoPosition
-                                                    ,S.StaffName
-                                                FROM dbo.Bingo B
-                                                INNER JOIN dbo.tblStaff S ON B.BingoCard = S.StaffBingo
-                                                WHERE BingoCalled = 1 AND BingoCard = ${card.BingoCard}
-                                                ORDER BY BingoPosition`, (err, records) => {
+                            tilesRequest.query(`DECLARE @missed int
+                            SET @missed = (SELECT BingoMissed FROM dbo.Bingo WHERE BingoNumber = 0 AND BingoCard = ${card.BingoCard})
+                            
+                            SELECT BingoNumber, BingoPosition, S.StaffName,
+                            CASE
+                                WHEN @missed = 0 THEN 0
+                                ELSE 1
+                            END AS BingoMissed
+                            FROM dbo.Bingo B
+                            INNER JOIN dbo.tblStaff S ON B.BingoCard = S.StaffBingo
+                            WHERE BingoCalled = 1 AND BingoMissed = 0 AND BingoCard = ${card.BingoCard}
+                            ORDER BY BingoPosition`, (err, records) => {
                                                     if (err) {console.log(err); console.log("checkwin.js base tilesRequest error")}
                                                     if (CheckWinFunction.BASE(records.recordsets[0])) {
                                                         SendMail.WINNER(records.recordsets[0][0].StaffName)

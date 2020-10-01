@@ -11,6 +11,8 @@ const MandMOther = require("./mandm/other.js")
 const RandomKUDOS = require("./mandm/random.js")
 const Serial = require("./serial/serial.js");
 const Bingo = require("./bingo/call.js")
+const Override = require("./bingo/override.js")
+const OverridePost = require("./bingo/overridePost.js")
 
 // router.get("/", (req, res) => {
 //     res.send("nice")
@@ -180,6 +182,18 @@ router.post("/bingo/number", (req, res) => {
 
 router.post("/bingo/reset", (req, res) => {
     Bingo.RESET(req, res)
+})
+
+router.get("/bingo/override/list", (req, res) => {
+    Override.BASE(req, res)
+})
+
+router.post("/bingo/override/list", (req, res) => {
+    OverridePost.POST(req, res)
+})
+
+router.get("/bingo/override", (req, res) => {
+    res.sendFile(__dirname + "/views/override.html")
 })
 
 module.exports = router;

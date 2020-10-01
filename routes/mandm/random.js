@@ -12,6 +12,7 @@ const config = {
 }
 
 const BASE = (req, res) => {
+     
     sql.connect(config, () => {
         let request = new sql.Request()
         request.query(`SELECT [EventIndex]

@@ -14,13 +14,14 @@ const config = {
 }
 
 const BASE = (req, res) => {
+     
     sql.connect(config, () => {
         let request = new sql.Request();
         request.query(`SELECT [StaffIndex], [StaffName], [StaffEMail]
                 FROM [dbo].[tblStaff]
                 WHERE StaffEnded IS NULL AND
                 StaffName LIKE '${req.params.name}%';`, (err, recordset) => {
-            if (err) {console.log(err);}
+            if (err) {console.log(err);console.log("employeepredict.js base error")}
             res.send(recordset);
         });
     });

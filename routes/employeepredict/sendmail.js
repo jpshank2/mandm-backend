@@ -39,6 +39,7 @@ let EMAIL = (info) => {
 }
 
 let UPWARD = (info) => {
+     
     sql.connect(config, () => {
         let request = new sql.Request()
         request.query(`DECLARE @staff int
@@ -49,6 +50,7 @@ let UPWARD = (info) => {
         WHERE StaffIndex = @staff`, (err, recordset) => {
             if (err) {
                 console.log(err)
+                console.log("employeepredict/sendmail.js upward error")
             }
             transporter.sendMail({
                 from: process.env.EM_USER,
@@ -63,6 +65,7 @@ let UPWARD = (info) => {
 }
 
 let DOWNWARD = (info) => {
+     
     sql.connect(config, () => {
         let request = new sql.Request()
         request.query(`DECLARE @staff int
@@ -73,6 +76,7 @@ let DOWNWARD = (info) => {
         WHERE StaffIndex = @staff`, (err, recordset) => {
             if (err) {
                 console.log(err)
+                console.log("employeepredict/sendmail.js downward error")
             }
             transporter.sendMail({
                 from: process.env.EM_USER,

@@ -4,7 +4,7 @@ const SendMail = require("./sendmail.js")
 const CheckWin = require("./checkwin.js")
 
 const job = new CronJob(
-    '00 30 14 * * 1-5', () => {
+    '00 45 16 * * 1-5', () => {
         CheckWin.BASE()
     },
     null,
@@ -29,7 +29,7 @@ const BASE = (req, res) => {
         let request = new sql.Request()
         request.query(`SELECT DISTINCT BingoNumber
                         FROM dbo.Bingo
-                        WHERE BingoCalled !=1`, (err, recordset) => {
+                        WHERE BingoCalled = 0`, (err, recordset) => {
                             if (err) {console.log(err); console.log("call.js base error")}
                             let selection = Math.floor(Math.random() * recordset.recordsets[0].length)
                             res.send(recordset.recordsets[0][selection])
@@ -41,8 +41,8 @@ const DATES = (req, res) => {
     sql.connect(config, () => {
         let request = new sql.Request()
         request.query(`SELECT DISTINCT BingoDate, BingoNumber
-                        FROM dbo.Bingo
-                        WHERE BingoDate IS NOT NULL`, (err, recordset) => {
+        FROM dbo.Bingo
+        WHERE BingoCalled = 1 AND BingoNumber != 0`, (err, recordset) => {
                             if (err) {console.log(err); console.log("call.js dates error")}
                             res.send(recordset.recordsets[0])
                         })
@@ -53,12 +53,14 @@ const POST = (req, res) => {
     sql.connect(config, () => {
         let request = new sql.Request()
         request.query(`UPDATE dbo.Bingo
-                        SET BingoCalled = 1, BingoDate = CURRENT_TIMESTAMP
-                        WHERE BingoNumber = ${req.body.number}`, (err, recordset) => {
+                        SET BingoCalled = 1, BingoDate = CONVERT(DATE, CURRENT_TIMESTAMP)
+                        FROM dbo.Bingo B FULL OUTER JOIN dbo.tblStaff S ON B.BingoCard = S.StaffBingo
+                        WHERE BingoNumber = ${req.body.number} AND S.StaffName IS NOT NULL`, (err, recordset) => {
                             if (err) {
                                 console.log(err)
                                 console.log("call.js post error")
                             }
+                            SendMail.CHECK(req.body.number)
                             SendMail.EMAIL(req.body.number)
                         })
     })
@@ -69,7 +71,11 @@ const RESET = (req, res) => {
         let request = new sql.Request()
         request.query(`UPDATE dbo.Bingo
                         SET BingoCalled = 0, BingoDate = NULL, BingoMissed = 0
-                        WHERE BingoNumber != 0`, (err, recordset) => {
+                        WHERE BingoNumber != 0
+                        
+                        UPDATE dbo.Bingo
+                        SET BingoMissed = 0, BingoDate = NULL
+                        WHERE BingoNumber = 0`, (err, recordset) => {
                             if (err) {
                                 console.log(err);console.log("call.js reset error")
                             }
