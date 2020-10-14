@@ -18,6 +18,7 @@ const BASE = () => {
         cardRequest.query(`SELECT DISTINCT BingoCard
                         FROM dbo.Bingo`, (err, recordset) => {
                             if (err) {console.log(err); console.log("checkwin.js base cardRequest error")}
+
                             recordset.recordsets[0].forEach(card => {
                             let tilesRequest = new sql.Request()
                             tilesRequest.query(`DECLARE @missed int
@@ -30,11 +31,13 @@ const BASE = () => {
                             END AS BingoMissed
                             FROM dbo.Bingo B
                             INNER JOIN dbo.tblStaff S ON B.BingoCard = S.StaffBingo
-                            WHERE BingoCalled = 1 AND BingoMissed = 0 AND BingoCard = ${card.BingoCard}
+                            WHERE BingoCalled = 1 AND BingoMissed = 0 AND BingoCard = ${card.BingoCard} AND BingoDate > S.StaffStarted
                             ORDER BY BingoPosition`, (err, records) => {
                                                     if (err) {console.log(err); console.log("checkwin.js base tilesRequest error")}
                                                     if (CheckWinFunction.BASE(records.recordsets[0])) {
                                                         SendMail.WINNER(records.recordsets[0][0].StaffName)
+                                                    } else {
+                                                        SendMail.NOWINNER()
                                                     }
                                                 })
                                             })

@@ -129,8 +129,18 @@ let WINNER = name => {
     })
 }
 
+let NOWINNER = () => {
+    transporter.sendMail({
+        from: process.env.EM_USER,
+        to: 'jeremyshank@bmss.com',
+        subject: `No Winner for ${moment(Date.now()).format("MM/DD/YYYY")}`,
+        html: '<p>EOM</p>'
+    })
+}
+
 module.exports = {
     EMAIL: EMAIL,
     WINNER: WINNER,
-    CHECK: CHECK
+    CHECK: CHECK,
+    NOWINNER: NOWINNER
 }

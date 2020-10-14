@@ -54,8 +54,8 @@ const POST = (req, res) => {
         let request = new sql.Request()
         request.query(`UPDATE dbo.Bingo
                         SET BingoCalled = 1, BingoDate = CONVERT(DATE, CURRENT_TIMESTAMP)
-                        FROM dbo.Bingo B FULL OUTER JOIN dbo.tblStaff S ON B.BingoCard = S.StaffBingo
-                        WHERE BingoNumber = ${req.body.number} AND S.StaffName IS NOT NULL`, (err, recordset) => {
+                        FROM dbo.Bingo B
+                        WHERE BingoNumber = ${req.body.number}`, (err, recordset) => {
                             if (err) {
                                 console.log(err)
                                 console.log("call.js post error")
