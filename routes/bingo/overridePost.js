@@ -17,7 +17,7 @@ const POST = (req, res) => {
             if (req.body.override.indexOf(person) === req.body.override.lastIndexOf(person)) {
                 let request = new sql.Request()
                 request.query(`DECLARE @card int
-                            SET @card = (SELECT StaffBingo FROM dbo.tblStaff WHERE StaffIndex = ${person})
+                            SET @card = (SELECT StaffBingo FROM dbo.tblStaff WHERE StaffIndex = ${person} AND StaffEnded IS NULL)
                             DECLARE @missed int
                             SET @missed = (SELECT BingoMissed FROM dbo.Bingo WHERE BingoCard = @card AND BingoNumber = 0)
                             

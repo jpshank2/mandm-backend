@@ -6,9 +6,10 @@ const CheckWin = require("./checkwin.js")
 const job = new CronJob(
     '00 45 16 * * 1-5', () => {
         CheckWin.BASE()
+        console.log("working")
     },
     null,
-    false,
+    true,
     'America/Chicago'
 )
 

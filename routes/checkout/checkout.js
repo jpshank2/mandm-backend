@@ -1,4 +1,5 @@
 const sql = require("mssql")
+const RandExp = require('randexp')
 
 const config = {
     user: process.env.DV_DB_USER,
@@ -45,6 +46,7 @@ const THISOFFICE = (req, res) => {
         ,CONVERT(datetime, [CheckedIn], 120) AS CheckedIn
         ,CONVERT(DATETIME, [CheckedOut], 120) AS CheckedOut
         ,ImagePath
+        ,OfficeCode
         FROM dbo.OpenOffices
         INNER JOIN dbo.tblStaff S ON EmployeeID = S.StaffIndex
         WHERE Name = '${id}';`, (err, recordset) => {
@@ -63,13 +65,15 @@ const CHECKOUT = (req, res) => {
     if (patt.test(location)) {
         location = location.replace("'", "''")
     }
+    let randexp = new RandExp(/[1-9]\d\d\d\d\d/)
+
     sql.connect(config, () => {
         let request = new sql.Request();
         request.query(`DECLARE @employee int
         SET @employee = (SELECT StaffIndex FROM dbo.tblStaff WHERE StaffEmail = '${email}')
         
-        INSERT INTO dbo.OpenOffices (Name, Location, Site, StandUp, CheckedOut, CheckedIn, EmployeeID, ImagePath)
-        VALUES ('${name}', '${location}', '${site}', ${standUp}, CONVERT(DATETIME, '${checkedOut}', 120), CONVERT(DATETIME,'${checkedIn}', 120), @employee, '${image}');`, 
+        INSERT INTO dbo.OpenOffices (Name, Location, Site, StandUp, CheckedOut, CheckedIn, EmployeeID, ImagePath, OfficeCode)
+        VALUES ('${name}', '${location}', '${site}', ${standUp}, CONVERT(DATETIME, '${checkedOut}', 120), CONVERT(DATETIME,'${checkedIn}', 120), @employee, '${image}', ${randexp.gen()});`, 
         (err, recordset) => {
             if (err) {
                 console.log(err)

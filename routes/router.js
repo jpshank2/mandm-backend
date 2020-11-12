@@ -6,6 +6,7 @@ const EPredict  = require("./employeepredict/employeepredict.js")
 const HomeRoom  = require("./homeroom/homeroom.js")
 const OfficeCheckOut = require('./checkout/checkout.js')
 const OfficeSendMail = require('./checkout/sendmail.js')
+const OfficeCancel = require('./checkout/cancel.js')
 const MandM = require("./mandm/dashboard.js")
 const MandMOther = require("./mandm/other.js")
 const RandomKUDOS = require("./mandm/random.js")
@@ -13,6 +14,7 @@ const Serial = require("./serial/serial.js");
 const Bingo = require("./bingo/call.js")
 const Override = require("./bingo/override.js")
 const OverridePost = require("./bingo/overridePost.js")
+const Support = require("./support/sendmail.js")
 
 // router.get("/", (req, res) => {
 //     res.send("nice")
@@ -124,6 +126,15 @@ router.post("/offices/:id", (req, res) => {
     OfficeSendMail.EMAIL(req.body)
 })
 
+router.get("/offices/cancel/:id", (req, res) => {
+    OfficeCancel.CANCEL(req, res)
+    //OfficeSendMail.CANCEL(req.body)
+})
+
+router.post("/offices/cancel/confirm", (req, res) => {
+    OfficeCancel.BASE(req, res)
+})
+
 router.get("/staff/:id", (req, res) => {
     OfficeCheckOut.STAFF(req, res)
 })
@@ -194,6 +205,15 @@ router.post("/bingo/override/list", (req, res) => {
 
 router.get("/bingo/override", (req, res) => {
     res.sendFile(__dirname + "/views/override.html")
+})
+
+router.post("/support", (req, res) => {
+    //console.log(req.body)
+    Support.BASE(req.body)
+})
+
+router.get("/test", (req, res) => {
+    OfficeCancel.CANCEL(req, res)
 })
 
 module.exports = router;

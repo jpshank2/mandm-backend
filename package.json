@@ -20,6 +20,7 @@
     "mssql": "^6.2.0",
     "nodemailer": "^6.4.6",
     "nodemon": "^1.19.4",
+    "randexp": "^0.5.3",
     "tedious": "^6.7.0"
   }
 }

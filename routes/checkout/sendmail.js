@@ -1,5 +1,17 @@
 const nodemailer = require('nodemailer');
 const ical       = require('ical-generator');
+const sql = require("mssql")
+
+const config = {
+    user: process.env.DV_DB_USER,
+    password: process.env.DV_DB_PASS,
+    server: process.env.DV_DB_SERVER,
+    database: process.env.DV_DB_DB,
+    options: {
+        encrypt: true,
+        enableArithAbort: true
+    }
+}
 
 let transporter = nodemailer.createTransport({
     host: "smtp.office365.com",
@@ -42,6 +54,31 @@ let EMAIL = (info) => {
     })
 }
 
+const CANCEL = (info) => {
+    sql.close()
+    sql.connect(config, () => {
+        let request = new sql.Request();
+        request.query(`SELECT [Name]
+        --,[OfficeCode]
+        ,S.StaffEMail
+    FROM [DataWarehouse].[dbo].[OpenOffices] O
+    INNER JOIN dbo.tblStaff S ON S.StaffIndex = O.EmployeeID
+    WHERE ID = ${info.code}`, (err, recordset) => {
+            if (err) {
+                console.log(err)
+                console.log("cancel.js CANCEL error")
+            }
+            transporter.sendMail({
+                from: process.env.EM_USER,
+                to: 'jeremyshank@bmss.com',//recordset.recordsets[0][0].StaffEMail,
+                subject: `${info.name} Cancelation Code`,
+                html: `<p>Please use the following code to cancel your selected office checkout.</p><br><p><strong>test</strong></p>`
+            })
+        })
+    })
+}
+
 module.exports = {
-    EMAIL: EMAIL
+    EMAIL: EMAIL,
+    CANCEL: CANCEL
 }

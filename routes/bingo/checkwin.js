@@ -31,13 +31,11 @@ const BASE = () => {
                             END AS BingoMissed
                             FROM dbo.Bingo B
                             INNER JOIN dbo.tblStaff S ON B.BingoCard = S.StaffBingo
-                            WHERE BingoCalled = 1 AND BingoMissed = 0 AND BingoCard = ${card.BingoCard} AND BingoDate > S.StaffStarted
+                            WHERE BingoCalled = 1 AND BingoMissed < 1 AND BingoCard = ${card.BingoCard} AND BingoDate > S.StaffStarted
                             ORDER BY BingoPosition`, (err, records) => {
                                                     if (err) {console.log(err); console.log("checkwin.js base tilesRequest error")}
                                                     if (CheckWinFunction.BASE(records.recordsets[0])) {
                                                         SendMail.WINNER(records.recordsets[0][0].StaffName)
-                                                    } else {
-                                                        SendMail.NOWINNER()
                                                     }
                                                 })
                                             })
