@@ -1,19 +1,18 @@
 const sql = require("mssql");
-const CronJob = require('cron').CronJob
+// const CronJob = require('cron').CronJob
 const SendMail = require("./sendmail.js")
-const CheckWin = require("./checkwin.js")
+// const CheckWin = require("./checkwin.js")
 
-const job = new CronJob(
-    '00 45 16 * * 1-5', () => {
-        CheckWin.BASE()
-        console.log("working")
-    },
-    null,
-    true,
-    'America/Chicago'
-)
+// const job = new CronJob(
+//     '00 45 16 * * 1-5', () => {
+//         CheckWin.BASE()
+//     },
+//     null,
+//     true,
+//     'America/Chicago'
+// )
 
-job.start()
+// job.start()
 
 const config = {
     user: process.env.DV_DB_USER,

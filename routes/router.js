@@ -147,9 +147,9 @@ router.get("/mandm/:id", (req, res) => {
     MandM.BASE(req, res)
 })
 
-router.post("/mandm/other", (req, res) => {
-    MandMOther.POST(req, res)
-})
+// router.post("/mandm/other", (req, res) => {
+//     MandMOther.POST(req, res)
+// })
 
 router.get("/kudos/:cornerstone", (req, res) => {
     RandomKUDOS.BASE(req, res)

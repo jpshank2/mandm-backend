@@ -12,6 +12,30 @@ const config = {
     }
 }
 
+const cleanup = () => {
+    sql.connect(config, () => {
+        let request = new sql.Request()
+        request.query(`UPDATE dbo.Bingo
+        SET BingoPerfect = 
+            CASE
+                WHEN BingoMissed = 0 THEN BingoPerfect - 1
+                ELSE BingoPerfect
+            END,
+        BingoMissedTwice = 
+            CASE
+                WHEN BingoMissed > 1 THEN BingoMissedTwice + 1
+                ELSE BingoMissedTwice
+            END,
+        BingoMissedThrice = 
+            CASE
+                WHEN BingoMissed > 2 THEN BingoMissedThrice + 1
+                ELSE BingoMissedThrice
+            END`, (err, recordset) => {
+                if (err) {console.log(err); console.log("checkwin.js cleanup error")}
+        });
+    })
+}
+
 const BASE = () => {
     sql.connect(config, () => {
         let cardRequest = new sql.Request()
@@ -36,6 +60,9 @@ const BASE = () => {
                                                     if (err) {console.log(err); console.log("checkwin.js base tilesRequest error")}
                                                     if (CheckWinFunction.BASE(records.recordsets[0])) {
                                                         SendMail.WINNER(records.recordsets[0][0].StaffName)
+                                                        cleanup()
+                                                    } else {
+                                                        SendMail.NOWINNER()
                                                     }
                                                 })
                                             })
