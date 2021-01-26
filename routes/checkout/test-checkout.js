@@ -91,7 +91,8 @@ const STAFF = (req, res) => {
     id = id.replace(patt, " ")
     sql.connect(config, () => {
         let request = new sql.Request();
-        request.query(`SELECT S.StaffName
+        request.query(`USE DataWarehouse
+        SELECT S.StaffName
         ,O.Name
 		,O.Location
 		,O.CheckedIn
@@ -100,8 +101,7 @@ const STAFF = (req, res) => {
         ,O.ID
 FROM dbo.OpenOffices O
 INNER JOIN dbo.tblStaff S ON O.EmployeeID = S.StaffIndex
-WHERE S.StaffName LIKE '%${id}%' AND CheckedOut > Convert(DateTime, DATEDIFF(DAY, 0, GETDATE()))
-AND CheckedIn < Convert(DateTime, DATEDIFF(DAY, -1, GETDATE()));`,
+WHERE S.StaffName LIKE '%${id}%' AND GETDATE() BETWEEN CAST(CheckedOut AS date) AND CAST(CheckedIn AS date);`,
         (err, recordset) => {
             if (err) {
                 console.log(err)
