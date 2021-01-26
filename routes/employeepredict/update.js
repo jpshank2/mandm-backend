@@ -46,16 +46,23 @@ let UPWARD = info => {
     if (patt.test(retain)) {
         retain = retain.replace("'", "''")
     }
+
     let lose = info.lose
     if (patt.test(lose)) {
         lose = lose.replace("'", "''")
     }
+
+    let name = info.name
+    if (patt.test(name)) {
+        name = name.replace("''")
+    }
+
     sql.connect(config, () => {
         let request = new sql.Request()
         request.query(`DECLARE @staffIndex int
         SET @staffIndex = (SELECT StaffIndex FROM [dbo].[tblStaff] WHERE StaffEMail = '${info.senderEmail}')
         INSERT INTO [dbo].[MandM](EventDate, EventPerson, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
-        VALUES (CURRENT_TIMESTAMP, '${info.name}', 'M+M', 'FEEDBACK', 'UPWARD', '${info.cornerstone} - ${info.project}: Rating - ${info.rating}; Retain - ${retain}; Lose - ${lose}', @staffIndex, '${info.senderEmail}');`, 
+        VALUES (CURRENT_TIMESTAMP, '${name}', 'M+M', 'FEEDBACK', 'UPWARD', '${info.project}: Rating - ${info.rating}; Retain - ${retain}; Lose - ${lose}', @staffIndex, '${info.senderEmail}');`, 
         (err, recordset) => {
             if (err) {
                 console.log(err)
@@ -72,16 +79,23 @@ let DOWNWARD = info => {
     if (patt.test(retain)) {
         retain = retain.replace("'", "''")
     }
+
     let lose = info.lose
     if (patt.test(lose)) {
         lose = lose.replace("'", "''")
     }
+
+    let name = info.name
+    if (patt.test(name)) {
+        name = name.replace("''")
+    }
+
     sql.connect(config, () => {
         let request = new sql.Request()
         request.query(`DECLARE @staffIndex int
         SET @staffIndex = (SELECT StaffIndex FROM [dbo].[tblStaff] WHERE StaffEMail = '${info.senderEmail}')
         INSERT INTO [dbo].[MandM](EventDate, EventPerson, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
-        VALUES (CURRENT_TIMESTAMP, '${info.name}', 'M+M', 'FEEDBACK', 'DOWNWARD', '${info.cornerstone} - ${info.project}: Rating - ${info.rating}; Retain - ${retain}; Lose - ${lose}', @staffIndex, '${info.senderEmail}');`, 
+        VALUES (CURRENT_TIMESTAMP, '${name}', 'M+M', 'FEEDBACK', 'DOWNWARD', '${info.project}: Rating - ${info.rating}; Retain - ${retain}; Lose - ${lose}', @staffIndex, '${info.senderEmail}');`, 
         (err, recordset) => {
             if (err) {
                 console.log(err)

@@ -39,11 +39,17 @@ let EMAIL = (info) => {
 }
 
 let UPWARD = (info) => {
+
+    let name = info.name
+    let patt = /.'/g
+    if (patt.test(name)) {
+        name = name.replace("'", "''")
+    }
      
     sql.connect(config, () => {
         let request = new sql.Request()
         request.query(`DECLARE @staff int
-        SET @staff = (SELECT StaffIndex FROM dbo.MandMLeaders WHERE Category = (SELECT StaffAttribute FROM dbo.tblStaff WHERE StaffName = '${info.name}'))
+        SET @staff = (SELECT StaffIndex FROM dbo.MandMLeaders WHERE Category = (SELECT StaffAttribute FROM dbo.tblStaff WHERE StaffName = '${name}'))
         
         SELECT StaffEMail
         FROM [DataWarehouse].[dbo].[tblStaff]
@@ -58,18 +64,24 @@ let UPWARD = (info) => {
                 cc: recordset.recordsets[0][0].StaffEMail,
                 bcc: info.senderEmail,
                 subject: `ROLO - Upward for ${info.name}`,
-                html: `<h1 style="text-align: center">ROLO - Upward</h1><br><p><strong>Employee Name: </strong>${info.name}</p><p><strong>Project: </strong>${info.project}</p><p><strong>How did ${info.name} do on the project? </strong>${info.rating}</p><p><strong>Cornerstone Exhibited: </strong>${info.cornerstone}</p><p><strong>Submitted by: </strong>${info.senderName}</p><p><strong>Today's Date: </strong>${d}</p><br><br><h2 style="text-align: center">Retain</h2><p>${info.retain}</p><br><h2 style="text-align: center">Lose</h2><p>${info.lose}</p>`
+                html: `<h1 style="text-align: center">ROLO - Upward</h1><br><p><strong>Employee Name: </strong>${info.name}</p><p><strong>Project: </strong>${info.project}</p><p><strong>How did ${info.name} do on the project? </strong>${info.rating}</p><p><strong>Submitted by: </strong>${info.senderName}</p><p><strong>Today's Date: </strong>${d}</p><br><br><h2 style="text-align: center">Retain</h2><p>${info.retain}</p><br><h2 style="text-align: center">Lose</h2><p>${info.lose}</p>`
             })
           })
         })
 }
 
 let DOWNWARD = (info) => {
+
+    let name = info.name
+    let patt = /.'/g
+    if (patt.test(name)) {
+        name = name.replace("'", "''")
+    }
      
     sql.connect(config, () => {
         let request = new sql.Request()
         request.query(`DECLARE @staff int
-        SET @staff = (SELECT StaffIndex FROM dbo.MandMLeaders WHERE Category = (SELECT StaffAttribute FROM dbo.tblStaff WHERE StaffName = '${info.name}'))
+        SET @staff = (SELECT StaffIndex FROM dbo.MandMLeaders WHERE Category = (SELECT StaffAttribute FROM dbo.tblStaff WHERE StaffName = '${name}'))
         
         SELECT StaffEMail
         FROM [DataWarehouse].[dbo].[tblStaff]
@@ -78,16 +90,29 @@ let DOWNWARD = (info) => {
                 console.log(err)
                 console.log("employeepredict/sendmail.js downward error")
             }
-            transporter.sendMail({
-                from: process.env.EM_USER,
-                to: "zealhr@bmss.com",
-                cc: `${recordset.recordsets[0][0].StaffEMail}, ${info.userEmail}`,
-                bcc: info.senderEmail,
-                subject: `ROLO - Downward for ${info.name}`,
-                html: `<h1 style="text-align: center">ROLO - Downward</h1><br><p><strong>Employee Name: </strong>${info.name}</p><p><strong>Project: </strong>${info.project}</p><p><strong>How did ${info.name} do on the project? </strong>${info.rating}</p><p><strong>Cornerstone Exhibited: </strong>${info.cornerstone}</p><p><strong>Submitted by: </strong>${info.senderName}</p><p><strong>Today's Date: </strong>${d}</p><br><br><h2 style="text-align: center">Retain</h2><p>${info.retain}</p><br><h2 style="text-align: center">Lose</h2><p>${info.lose}</p>`
-            })
-          })
+
+            //console.log(recordset.recordsets[0].length > 0 ? recordset.recordsets[0][0].StaffEMail : 'nothing')
+            if (recordset.recordsets[0].length > 0) {
+                transporter.sendMail({
+                    from: process.env.EM_USER,
+                    to: "zealhr@bmss.com",
+                    cc: `${recordset.recordsets[0][0].StaffEMail}, ${info.userEmail}`,
+                    bcc: info.senderEmail,
+                    subject: `ROLO - Downward for ${info.name}`,
+                    html: `<h1 style="text-align: center">ROLO - Downward</h1><br><p><strong>Employee Name: </strong>${info.name}</p><p><strong>Project: </strong>${info.project}</p><p><strong>How did ${info.name} do on the project? </strong>${info.rating}</p><p><strong>Cornerstone Exhibited: </strong>${info.cornerstone}</p><p><strong>Submitted by: </strong>${info.senderName}</p><p><strong>Today's Date: </strong>${d}</p><br><br><h2 style="text-align: center">Retain</h2><p>${info.retain}</p><br><h2 style="text-align: center">Lose</h2><p>${info.lose}</p>`
+                })
+            } else {
+                transporter.sendMail({
+                    from: process.env.EM_USER,
+                    to: "zealhr@bmss.com",
+                    cc: `${info.userEmail}`,
+                    bcc: info.senderEmail,
+                    subject: `ROLO - Downward for ${info.name}`,
+                    html: `<h1 style="text-align: center">ROLO - Downward</h1><br><p><strong>Employee Name: </strong>${info.name}</p><p><strong>Project: </strong>${info.project}</p><p><strong>How did ${info.name} do on the project? </strong>${info.rating}</p><p><strong>Submitted by: </strong>${info.senderName}</p><p><strong>Today's Date: </strong>${d}</p><br><br><h2 style="text-align: center">Retain</h2><p>${info.retain}</p><br><h2 style="text-align: center">Lose</h2><p>${info.lose}</p>`
+                })
+            }
         })
+    })
 }
 
 module.exports = {

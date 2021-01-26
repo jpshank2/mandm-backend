@@ -16,26 +16,19 @@ const devConfig = {
 const BASE = (req, res) => {
      
     sql.connect(devConfig, () => {
-        let name
+        let name = req.params.name
 
-        if (req.params.name === 'kmoore' || req.params.name === 'hrussell') {
-            name = 'dking'
-        } else if (req.params.name === 'acaldwell') {
-            name = 'blorimer'
-        } else {
-            name = req.params.name
-        }
-    
         let request = new sql.Request();
-        if (name === 'dmurphy') {
-            request.query(`SELECT [StaffIndex], [StaffName], [StaffCode]
-            FROM tblStaff
-            WHERE StaffEnded IS NULL AND StaffOffice IN ('BHM', 'GAD', 'HSV') AND StaffName <> 'Don Murphy'
-            ORDER BY StaffIndex;`, (err, recordset) => {
-                if (err) {console.log(err);}
-                res.send(recordset);
-            })
-        } else if (name === 'dbrock') {
+        // if (name === 'dmurphy') {
+        //     request.query(`SELECT [StaffIndex], [StaffName], [StaffCode]
+        //     FROM tblStaff
+        //     WHERE StaffEnded IS NULL AND StaffOffice IN ('BHM', 'GAD', 'HSV') AND StaffName <> 'Don Murphy'
+        //     ORDER BY StaffIndex;`, (err, recordset) => {
+        //         if (err) {console.log(err);}
+        //         res.send(recordset);
+        //     })
+        // } else 
+        if (name === 'dbrock') {
             request.query(`SELECT S.StaffIndex, S.StaffName, S.StaffCode, (SELECT TOP 1 EventDate
                                 FROM dbo.MandM
                                 WHERE EventPerson = S.StaffName
@@ -55,6 +48,45 @@ const BASE = (req, res) => {
                                 ORDER BY EventDate DESC) AS [LastDate]
                             FROM dbo.tblStaff S
                             WHERE S.StaffAttribute IN (3, 29) 
+                            AND S.StaffEnded IS NULL;`, (err, recordset) => {
+                                if (err) {
+                                    res.send(err)
+                                }
+                                res.send(recordset)
+                })
+        } else if (name === 'blorimer') {
+            request.query(`SELECT S.StaffIndex, S.StaffName, S.StaffCode, (SELECT TOP 1 EventDate
+                                FROM dbo.MandM
+                                WHERE EventPerson = S.StaffName
+                                ORDER BY EventDate DESC) AS [LastDate]
+                            FROM dbo.tblStaff S
+                            WHERE S.StaffAttribute IN (14, 30) 
+                            AND S.StaffEnded IS NULL;`, (err, recordset) => {
+                                if (err) {
+                                    res.send(err)
+                                }
+                                res.send(recordset)
+                })
+        } else if (name === 'munderhill') {
+            request.query(`SELECT S.StaffIndex, S.StaffName, S.StaffCode, (SELECT TOP 1 EventDate
+                                FROM dbo.MandM
+                                WHERE EventPerson = S.StaffName
+                                ORDER BY EventDate DESC) AS [LastDate]
+                            FROM dbo.tblStaff S
+                            WHERE S.StaffAttribute IN (32, 33) 
+                            AND S.StaffEnded IS NULL;`, (err, recordset) => {
+                                if (err) {
+                                    res.send(err)
+                                }
+                                res.send(recordset)
+                })
+        } else if (name === 'mbrand') {
+            request.query(`SELECT S.StaffIndex, S.StaffName, S.StaffCode, (SELECT TOP 1 EventDate
+                                FROM dbo.MandM
+                                WHERE EventPerson = S.StaffName
+                                ORDER BY EventDate DESC) AS [LastDate]
+                            FROM dbo.tblStaff S
+                            WHERE S.StaffAttribute IN (9, 31) 
                             AND S.StaffEnded IS NULL;`, (err, recordset) => {
                                 if (err) {
                                     res.send(err)

@@ -29,38 +29,6 @@ const GETOFFICES = (req, res) => {
     })
 }
 
-const GETSTANDUP = (req, res) => {
-    sql.connect(config, () => {
-        let request = new sql.Request();
-        request.query(`SELECT DISTINCT Name, Location, Site, Number
-        FROM dbo.OpenOffices
-        WHERE Active = 1 AND Site = '${req.params.site}' AND Standup = 1
-        ORDER BY Number ASC;`, (err, recordset) => {
-            if (err) {
-                console.log(err)
-            } else {
-                res.send(recordset.recordsets[0])
-            }
-        })
-    })
-}
-
-const GETNONSTANDUP = (req, res) => {
-    sql.connect(config, () => {
-        let request = new sql.Request();
-        request.query(`SELECT DISTINCT Name, Location, Site, Number
-        FROM dbo.OpenOffices
-        WHERE Active = 1 AND Site = '${req.params.site}' AND Standup = 0
-        ORDER BY Number ASC;`, (err, recordset) => {
-            if (err) {
-                console.log(err)
-            } else {
-                res.send(recordset.recordsets[0])
-            }
-        })
-    })
-}
-
 const THISOFFICE = (req, res) => {    
      
     let id = req.params.id
@@ -79,10 +47,9 @@ const THISOFFICE = (req, res) => {
         ,CONVERT(DATETIME, [CheckedOut], 120) AS CheckedOut
         ,ImagePath
         ,OfficeCode
-        ,Number
         FROM dbo.OpenOffices
         INNER JOIN dbo.tblStaff S ON EmployeeID = S.StaffIndex
-        WHERE Name = '${id}' AND Site = '${req.params.site}';`, (err, recordset) => {
+        WHERE Name = '${id}';`, (err, recordset) => {
             if (err) {
                 console.log(err)
             } else {
@@ -103,10 +70,10 @@ const CHECKOUT = (req, res) => {
     sql.connect(config, () => {
         let request = new sql.Request();
         request.query(`DECLARE @employee int
-        SET @employee = (SELECT StaffIndex FROM dbo.tblStaff WHERE StaffEmail = '${email}' AND StaffEnded IS NULL)
+        SET @employee = (SELECT StaffIndex FROM dbo.tblStaff WHERE StaffEmail = '${email}')
         
-        INSERT INTO dbo.OpenOffices (Name, Location, Site, StandUp, CheckedOut, CheckedIn, EmployeeID, ImagePath, OfficeCode, Number, Active)
-        VALUES ('${name}', '${location}', '${site}', ${standUp}, CONVERT(DATETIME, '${checkedOut}', 120), CONVERT(DATETIME,'${checkedIn}', 120), @employee, '${image}', ${randexp.gen()}, ${number}, 1);`, 
+        INSERT INTO dbo.OpenOffices (Name, Location, Site, StandUp, CheckedOut, CheckedIn, EmployeeID, ImagePath, OfficeCode, Active, Number)
+        VALUES ('${name}', '${location}', '${site}', ${standUp}, CONVERT(DATETIME, '${checkedOut}', 120), CONVERT(DATETIME,'${checkedIn}', 120), @employee, '${image}', ${randexp.gen()}, 1, ${number});`, 
         (err, recordset) => {
             if (err) {
                 console.log(err)
@@ -133,7 +100,8 @@ const STAFF = (req, res) => {
         ,O.ID
 FROM dbo.OpenOffices O
 INNER JOIN dbo.tblStaff S ON O.EmployeeID = S.StaffIndex
-WHERE S.StaffName LIKE '%${id}%' AND GETDATE() BETWEEN CheckedOut AND CheckedIn;`,
+WHERE S.StaffName LIKE '%${id}%' AND CheckedOut > Convert(DateTime, DATEDIFF(DAY, 0, GETDATE()))
+AND CheckedIn < Convert(DateTime, DATEDIFF(DAY, -1, GETDATE()));`,
         (err, recordset) => {
             if (err) {
                 console.log(err)
@@ -148,7 +116,5 @@ module.exports = {
     BASE: GETOFFICES,
     SPECIFIC: THISOFFICE,
     CHECKOUT: CHECKOUT,
-    STAFF: STAFF,
-    GETSTANDUP: GETSTANDUP,
-    GETNONSTANDUP: GETNONSTANDUP
+    STAFF: STAFF
 }

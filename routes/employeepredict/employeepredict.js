@@ -14,13 +14,19 @@ const config = {
 }
 
 const BASE = (req, res) => {
+    
+    let name = req.params.name
+    let patt = /.'/g
+    if (patt.test(name)) {
+        name = name.replace("'", "''")
+    }
      
     sql.connect(config, () => {
         let request = new sql.Request();
         request.query(`SELECT [StaffIndex], [StaffName], [StaffEMail]
                 FROM [dbo].[tblStaff]
                 WHERE StaffEnded IS NULL AND
-                StaffName LIKE '${req.params.name}%';`, (err, recordset) => {
+                StaffName LIKE '${name}%';`, (err, recordset) => {
             if (err) {console.log(err);console.log("employeepredict.js base error")}
             res.send(recordset);
         });
@@ -36,7 +42,7 @@ const KUDOS = (req, res) => {
 }
 
 const UPWARD = (req, res) => {
-    if (req.body.cornerstone.length > 0) {
+    if (req.body.retain.length > 0 || req.body.lose.length > 0) {
         Update.UPWARD(req.body)
         SendMail.UPWARD(req.body)
         res.send("Thanks for sending a ROLO!")
@@ -44,7 +50,7 @@ const UPWARD = (req, res) => {
 }
 
 const DOWNWARD = (req, res) => {
-    if (req.body.cornerstone.length > 0) {
+    if (req.body.retain.length > 0 || req.body.lose.length > 0) {
         Update.DOWNWARD(req.body)
         SendMail.DOWNWARD(req.body)
         res.send("Thanks for sending a ROLO!")

@@ -33,14 +33,14 @@ const BASE = (req, res) => {
                ,@quarter AS [Tetramester]
         FROM dbo.MandM
         WHERE EventUpdatedBy LIKE '${req.params.id}%'
-        AND EventDate >= CASE WHEN @quarter = 1 THEN DATEFROMPARTS(YEAR(CURRENT_TIMESTAMP), 1, 1)
-                                WHEN @quarter = 2 THEN DATEFROMPARTS(YEAR(CURRENT_TIMESTAMP), 5, 1)
-                                WHEN @quarter = 3 THEN DATEFROMPARTS(YEAR(CURRENT_TIMESTAMP), 9, 1)
-                                ELSE DATEFROMPARTS(YEAR(CURRENT_TIMESTAMP), 1, 1) END
-        AND EventDate < CASE WHEN @quarter = 1 THEN DATEFROMPARTS(YEAR(CURRENT_TIMESTAMP), 5, 1)
-                                WHEN @quarter = 2 THEN DATEFROMPARTS(YEAR(CURRENT_TIMESTAMP), 9, 1)
-                                WHEN @quarter = 3 THEN DATEFROMPARTS(YEAR(CURRENT_TIMESTAMP) + 1, 1, 1)
-                                ELSE DATEFROMPARTS(YEAR(CURRENT_TIMESTAMP) + 1, 1, 1) END;`, (err, recordset) => {
+        AND EventDate BETWEEN CASE WHEN @quarter = 1 THEN DATEFROMPARTS(YEAR(GETDATE()), 1, 1)
+                        WHEN @quarter = 2 THEN DATEFROMPARTS(YEAR(GETDATE()), 5, 1)
+                        WHEN @quarter = 3 THEN DATEFROMPARTS(YEAR(GETDATE()), 9, 1)
+                        ELSE DATEFROMPARTS(YEAR(GETDATE()), 1, 1) END
+AND CASE WHEN @quarter = 1 THEN DATEFROMPARTS(YEAR(GETDATE()), 5, 1)
+                        WHEN @quarter = 2 THEN DATEFROMPARTS(YEAR(GETDATE()), 9, 1)
+                        WHEN @quarter = 3 THEN DATEFROMPARTS(YEAR(GETDATE()) + 1, 1, 1)
+                        ELSE DATEFROMPARTS(YEAR(GETDATE()) + 1, 1, 1) END;`, (err, recordset) => {
                                     if (err) {
                                         console.log(err)
                                     } else {

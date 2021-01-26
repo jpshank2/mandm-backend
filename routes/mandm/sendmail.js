@@ -1,4 +1,16 @@
+const { request } = require('express')
 const nodemailer = require('nodemailer')
+const sql = require('mssql')
+
+const config = {
+    user: process.env.DV_DB_USER,
+    password: process.env.DV_DB_PASS,
+    server: process.env.DV_DB_SERVER,
+    database: process.env.DV_DB_DB,
+    options: {
+        encrypt: true
+    }
+}
 
 let transporter = nodemailer.createTransport({
     host: "smtp.office365.com",
@@ -149,9 +161,26 @@ const EDUCATE = info => {
     }
 }
 
+const REQUEST = info => {
+    sql.connect(config, () => {
+        let request = new sql.Request()
+        request.query(`SELECT StaffEMail FROM dbo.tblStaff WHERE StaffName = '${info.name}'`, (err, recordset) => {
+            if (err) {console.log(err)}
+            transporter.sendMail({
+                from: process.env.EM_USER,
+                to: recordset.recordsets[0][0].StaffEMail,
+                cc: info.senderEmail,
+                subject: `${info.senderName} is Requesting a ROLO from ${info.name}`,
+                html: `<p>${info.name},</p><p>${info.senderName} is requesting a ROLO for the ${info.project} project</p><p>Thanks in advance for submitting a ROLO!</p>`
+            })
+        })
+    })
+}
+
 module.exports = {
     RECRUIT: RECRUIT,
     FEEDBACK: FEEDBACK,
     RELATE: RELATE,
-    EDUCATE: EDUCATE
+    EDUCATE: EDUCATE,
+    REQUEST: REQUEST
 }

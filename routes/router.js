@@ -1,20 +1,33 @@
 const express = require("express");
 const router  = express.Router();
+const app = express()
+const history = require('connect-history-api-fallback')
 //const MainPage  = require("./datadash/mainpage.js")
 //const NextPage  = require("./datadash/nextpage.js")
 const EPredict  = require("./employeepredict/employeepredict.js")
 const HomeRoom  = require("./homeroom/homeroom.js")
-const OfficeCheckOut = require('./checkout/checkout.js')
+const OfficeCheckOut = require('./checkout/test-checkout.js')
+const TestSiteOfficeCheckOut = require('./checkout/checkout.js')
 const OfficeSendMail = require('./checkout/sendmail.js')
 const OfficeCancel = require('./checkout/cancel.js')
 const MandM = require("./mandm/dashboard.js")
 const MandMOther = require("./mandm/other.js")
+const MandMRequest = require('./mandm/request.js')
 const RandomKUDOS = require("./mandm/random.js")
 const Serial = require("./serial/serial.js");
 const Bingo = require("./bingo/call.js")
 const Override = require("./bingo/override.js")
 const OverridePost = require("./bingo/overridePost.js")
-const Support = require("./support/sendmail.js")
+const Support = require("./support/sendmail.js");
+const OfficeAvailability = require("./checkout/available.js")
+const CheckClient = require("./clients/check-client.js")
+
+app.use(history({
+    rewrites:[
+        {from: /^\/checkout\/.*$/, to: '/'},
+        {from: /\/.*/, to:'/'}
+    ]
+}))
 
 // router.get("/", (req, res) => {
 //     res.send("nice")
@@ -113,6 +126,19 @@ router.post("/homeroom/", (req, res) => {
 //     HomeRoom.TPOST(req, res)
 // })
 
+router.get("/test-checkout/:site", (req, res) => {
+    TestSiteOfficeCheckOut.BASE(req, res)
+})
+
+router.get("/test-checkout/:site/:id", (req, res) => {
+    TestSiteOfficeCheckOut.SPECIFIC(req, res)
+})
+
+router.post("/test-checkout/:site/:id", (req, res) => {
+    TestSiteOfficeCheckOut.CHECKOUT(req, res)
+    OfficeSendMail.EMAIL(req.body)
+})
+
 router.get("/offices", (req, res) => {
     OfficeCheckOut.BASE(req, res)
 })
@@ -135,6 +161,18 @@ router.post("/offices/cancel/confirm", (req, res) => {
     OfficeCancel.BASE(req, res)
 })
 
+router.get("/offices/available/:site/:id", (req, res) => {
+    OfficeAvailability.AVAILABLE(req, res)
+})
+
+router.get("/offices/standup/:site", (req, res) => {
+    TestSiteOfficeCheckOut.GETSTANDUP(req, res)
+})
+
+router.get("/offices/nonstandup/:site", (req, res) => {
+    TestSiteOfficeCheckOut.GETNONSTANDUP(req, res)
+})
+
 router.get("/staff/:id", (req, res) => {
     OfficeCheckOut.STAFF(req, res)
 })
@@ -145,6 +183,10 @@ router.get("/", (req, res) => {
 
 router.get("/mandm/:id", (req, res) => {
     MandM.BASE(req, res)
+})
+
+router.post("/mandm/request", (req, res) => {
+    MandMRequest.BASE(req, res)
 })
 
 // router.post("/mandm/other", (req, res) => {
@@ -214,6 +256,18 @@ router.post("/support", (req, res) => {
 
 router.get("/test", (req, res) => {
     OfficeCancel.CANCEL(req, res)
+})
+
+router.post("/clients" , (req, res) => {
+    CheckClient.BASE(req, res)
+})
+
+router.post("/clients/mylist", (req, res) => {
+    CheckClient.SHOWCLIENTS(req, res)
+})
+
+router.post("./clients/myjobs", (req, res) => {
+    CheckClient.SHOWSTATUS(req, res)
 })
 
 module.exports = router;
