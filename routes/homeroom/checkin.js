@@ -26,7 +26,7 @@ let POST = (req, checked) => {
             let name = member.name
             let patt = /.'/g
             if (patt.test(name)) {
-                name = name.replace("'", "''")
+                name = name.replace(patt, "''")
             }
             let request = new sql.Request()
             request.query(`DECLARE @staffIndex int

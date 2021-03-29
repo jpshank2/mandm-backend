@@ -42,59 +42,86 @@ let transporter = nodemailer.createTransport({
 })
 
 let EMAIL = number => {
-    sql.connect(config, () => {
-        let request = new sql.Request()
-        request.query(`SELECT S.StaffEMail
-                        FROM [DataWarehouse].[dbo].[Bingo] B
-                        INNER JOIN dbo.tblStaff S ON B.BingoCard = StaffBingo
-                        WHERE BingoNumber = ${number}`, (err, recordset) => {
-                            if (err) {console.log(err); console.log("bingo sendmail.js draw error")}
-
-                            let messages = []
-
-                            recordset.recordsets[0].forEach((email, index) => {
-                                let letter
-                                let diff = number - 15
-                                if (diff <= 0) {
-                                    letter = 'B'
-                                } else if (diff > 0 && diff <= 15) {
-                                    letter = 'I'
-                                } else if (diff > 15 && diff <= 30) {
-                                    letter = 'N'
-                                } else if (diff > 30 && diff <= 45) {
-                                    letter = 'G'
-                                } else {
-                                    letter = 'O'
-                                }
-
-                                let message
-
-                                if (index === 0) {
-                                    message = {
-                                        from: process.env.EM_USER,
-                                        to: email.StaffEMail,
-                                        bcc: 'kmoore@bmss.com, jeremyshank@bmss.com',
-                                        subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
-                                        html: `<p>Remember to enter your time for yesterday by noon today!</p>`
-                                    }    
-                                } else {
-                                    message = {
-                                        from: process.env.EM_USER,
-                                        to: email.StaffEMail,
-                                        subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
-                                        html: `<p>Remember to enter your time for yesterday by noon today!</p>`
-                                    }
-                                }
-
-                                messages.push(message)
-                                
-                            })
-
-                            while(messages.length) {
-                                pooledTransporter.sendMail(messages.shift())
+    try {
+        let messages = []
+        let letter = 'B'
+        let diff = number - 15
+        if (diff <= 0) {
+            letter = 'B'
+        } else if (diff > 0 && diff <= 15) {
+            letter = 'I'
+        } else if (diff > 15 && diff <= 30) {
+            letter = 'N'
+        } else if (diff > 30 && diff <= 45) {
+            letter = 'G'
+        } else {
+            letter = 'O'
+        }
+        sql.connect(config)
+            .then(() => {
+                new sql.Request()
+                    .query(`SELECT S.StaffEMail
+                    FROM [DataWarehouse].[dbo].[Bingo] B
+                    INNER JOIN dbo.tblStaff S ON B.BingoCard = StaffBingo
+                    WHERE BingoNumber = ${number}`)
+                    .then(recordset => {
+                        if (recordset == null || recordset === 0) {
+                            return
+                        }
+                        recordset.recordsets[0].forEach((email, index) => {
+                            if (index === 0 ) {
+                                messages.push({
+                                    from: process.env.EM_USER,
+                                    to: email.StaffEMail,
+                                    bcc: 'kmoore@bmss.com; jeremyshank@bmss.com; lpence@bmss.com',
+                                    subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
+                                    html: `<p>You had ${letter} ${number} on your Bingo Card! Remember to enter your time for yesterday by noon today!</p>`
+                                })
+                            } else {
+                                messages.push({
+                                    from: process.env.EM_USER,
+                                    to: email.StaffEMail,
+                                    subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
+                                    html: `<p>You had ${letter} ${number} on your Bingo Card!</p><p>Remember to enter your time for yesterday by noon today!</p>`
+                                })
                             }
                         })
                     })
+                    .catch(err => {
+                        console.log(err)
+                    })
+            }).then(() => {
+                    new sql.Request()
+                        .query(`SELECT DISTINCT S.StaffEMail
+                        FROM [DataWarehouse].[dbo].[Bingo] B
+                        INNER JOIN dbo.tblStaff S ON B.BingoCard = StaffBingo
+                        WHERE BingoCard NOT IN (SELECT BingoCard FROM dbo.Bingo WHERE BingoNumber = ${number})`)
+                        .then(recordset => {
+                            if (recordset == null || recordset === 0) {
+                                return
+                            }
+                            recordset.recordsets[0].forEach(email => {
+                                messages.push({
+                                    from: process.env.EM_USER,
+                                    to: email.StaffEMail,
+                                    subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
+                                    html: `<p>You did not have ${letter} ${number} on your Bingo Card. Better luck tomorrow!</p><p>Remember to enter your time for yesterday by noon today!</p>`
+                                })
+                            })
+                        })
+                        .then(() => {
+                            messages.forEach(message => {
+                                pooledTransporter.sendMail(message)
+                            })
+                        }).catch(err => {
+                            console.log(err)
+                        })
+            }).catch(err => {
+                console.log(err)
+            })
+    } catch (err) {
+        console.log(err)
+    }
 }
 
 let CHECK = number => {

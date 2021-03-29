@@ -10,19 +10,19 @@ const config = {
     }
 }
 
-let KUDOS = (info) => {
+const KUDOS = (info) => {
     let project = info.description 
     let description = info.description
     let name = info.name
     let patt = /.'/g
     if (patt.test(description)) {
-        description = description.replace("'", "''")
+        description = description.replace(patt, "''")
     }
     if (patt.test(project)) {
-        project = project.replace("'", "''")
+        project = project.replace(patt, "''")
     }
     if (patt.test(name)) {
-        name = name.replace("'", "''")
+        name = name.replace(patt, "''")
     }
     sql.connect(config, () => {
         let request = new sql.Request()
@@ -39,22 +39,27 @@ let KUDOS = (info) => {
     })
 }
 
-let UPWARD = info => {
-     
+const UPWARD = info => {
+    console.log(info)
     let retain = info.retain
     let patt = /.'/g
     if (patt.test(retain)) {
-        retain = retain.replace("'", "''")
+        retain = retain.replace(patt, "''")
     }
 
     let lose = info.lose
     if (patt.test(lose)) {
-        lose = lose.replace("'", "''")
+        lose = lose.replace(patt, "''")
     }
 
     let name = info.name
     if (patt.test(name)) {
-        name = name.replace("''")
+        name = name.replace(patt, "''")
+    }
+
+    let project = info.project
+    if (patt.test(project)) {
+        project = project.replace(patt, "''")
     }
 
     sql.connect(config, () => {
@@ -62,7 +67,7 @@ let UPWARD = info => {
         request.query(`DECLARE @staffIndex int
         SET @staffIndex = (SELECT StaffIndex FROM [dbo].[tblStaff] WHERE StaffEMail = '${info.senderEmail}')
         INSERT INTO [dbo].[MandM](EventDate, EventPerson, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
-        VALUES (CURRENT_TIMESTAMP, '${name}', 'M+M', 'FEEDBACK', 'UPWARD', '${info.project}: Rating - ${info.rating}; Retain - ${retain}; Lose - ${lose}', @staffIndex, '${info.senderEmail}');`, 
+        VALUES (CURRENT_TIMESTAMP, '${name}', 'M+M', 'FEEDBACK', 'UPWARD', '${project}: Rating - ${info.rating}; Retain - ${retain}; Lose - ${lose}', @staffIndex, '${info.senderEmail}');`, 
         (err, recordset) => {
             if (err) {
                 console.log(err)
@@ -72,22 +77,27 @@ let UPWARD = info => {
     })
 }
 
-let DOWNWARD = info => {
-     
+const DOWNWARD = info => {
+    console.log(info)
     let retain = info.retain
     let patt = /.'/g
     if (patt.test(retain)) {
-        retain = retain.replace("'", "''")
+        retain = retain.replace(patt, "''")
     }
 
     let lose = info.lose
     if (patt.test(lose)) {
-        lose = lose.replace("'", "''")
+        lose = lose.replace(patt, "''")
     }
 
     let name = info.name
     if (patt.test(name)) {
-        name = name.replace("''")
+        name = name.replace(patt, "''")
+    }
+
+    let project = info.project
+    if (patt.test(project)) {
+        project = project.replace(patt, "''")
     }
 
     sql.connect(config, () => {
@@ -95,7 +105,7 @@ let DOWNWARD = info => {
         request.query(`DECLARE @staffIndex int
         SET @staffIndex = (SELECT StaffIndex FROM [dbo].[tblStaff] WHERE StaffEMail = '${info.senderEmail}')
         INSERT INTO [dbo].[MandM](EventDate, EventPerson, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
-        VALUES (CURRENT_TIMESTAMP, '${name}', 'M+M', 'FEEDBACK', 'DOWNWARD', '${info.project}: Rating - ${info.rating}; Retain - ${retain}; Lose - ${lose}', @staffIndex, '${info.senderEmail}');`, 
+        VALUES (CURRENT_TIMESTAMP, '${name}', 'M+M', 'FEEDBACK', 'DOWNWARD', '${project}: Rating - ${info.rating}; Retain - ${retain}; Lose - ${lose}', @staffIndex, '${info.senderEmail}');`, 
         (err, recordset) => {
             if (err) {
                 console.log(err)

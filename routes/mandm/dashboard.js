@@ -43,9 +43,8 @@ AND CASE WHEN @quarter = 1 THEN DATEFROMPARTS(YEAR(GETDATE()), 5, 1)
                         ELSE DATEFROMPARTS(YEAR(GETDATE()) + 1, 1, 1) END;`, (err, recordset) => {
                                     if (err) {
                                         console.log(err)
-                                    } else {
-                                        res.send(recordset)
                                     }
+                                    res.send(recordset)
                                 })
     })
 }

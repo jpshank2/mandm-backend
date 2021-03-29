@@ -18,7 +18,7 @@ const BASE = (req, res) => {
     let name = req.params.name
     let patt = /.'/g
     if (patt.test(name)) {
-        name = name.replace("'", "''")
+        name = name.replace(patt, "''")
     }
      
     sql.connect(config, () => {
@@ -42,6 +42,7 @@ const KUDOS = (req, res) => {
 }
 
 const UPWARD = (req, res) => {
+    console.log(req.body)
     if (req.body.retain.length > 0 || req.body.lose.length > 0) {
         Update.UPWARD(req.body)
         SendMail.UPWARD(req.body)
@@ -50,6 +51,7 @@ const UPWARD = (req, res) => {
 }
 
 const DOWNWARD = (req, res) => {
+    console.log(req.body)
     if (req.body.retain.length > 0 || req.body.lose.length > 0) {
         Update.DOWNWARD(req.body)
         SendMail.DOWNWARD(req.body)

@@ -17,10 +17,10 @@ const POST = (req, res) => {
         let request = new sql.Request()
         let patt = /.'/g
         if (patt.test(req.body.notes)) {
-            req.body.notes = req.body.notes.replace("'", "''")
+            req.body.notes = req.body.notes.replace(patt, "''")
         }
         if (patt.test(req.body.name)) {
-            req.body.name = req.body.name.replace("'", "''")
+            req.body.name = req.body.name.replace(patt, "''")
         }
         switch(req.body.option) {
             case 0:
@@ -28,7 +28,7 @@ const POST = (req, res) => {
                 request.query(`DECLARE @staff int
                     SET @staff = (SELECT StaffIndex FROM [dbo].[tblStaff] WHERE StaffEMail = '${req.body.senderEmail}')
                     INSERT INTO dbo.MandM (EventDate, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
-                    VALUES (CURRENT_TIMESTAMP, 'M+M', 'RECRUIT', 'RESUME', '${req.body.notes}', @staff, '${req.body.senderEmail}')`, (err, recordset) => {
+                    VALUES (CURRENT_TIMESTAMP, 'M+M', 'RECRUIT', 'RESUME', '${notes}', @staff, '${req.body.senderEmail}')`, (err, recordset) => {
                         if (err) {
                             console.log(err)
                             console.log(req.body)
@@ -42,7 +42,7 @@ const POST = (req, res) => {
                 request.query(`DECLARE @staff int
                     SET @staff = (SELECT StaffIndex FROM [dbo].[tblStaff] WHERE StaffEMail = '${req.body.senderEmail}')
                     INSERT INTO dbo.MandM (EventDate, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
-                    VALUES (CURRENT_TIMESTAMP, 'M+M', 'FEEDBACK', 'BUDGET', '${req.body.notes}', @staff, '${req.body.senderEmail}')`, (err, recordset) => {
+                    VALUES (CURRENT_TIMESTAMP, 'M+M', 'FEEDBACK', 'BUDGET', '${notes}', @staff, '${req.body.senderEmail}')`, (err, recordset) => {
                         if (err) {
                             console.log(err)
                             console.log(req.body)
@@ -56,7 +56,7 @@ const POST = (req, res) => {
                 request.query(`DECLARE @staff int
                     SET @staff = (SELECT StaffIndex FROM [dbo].[tblStaff] WHERE StaffEMail = '${req.body.senderEmail}')
                     INSERT INTO dbo.MandM (EventDate, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
-                    VALUES (CURRENT_TIMESTAMP, 'M+M', 'RELATE', 'VISIT', '${req.body.notes}', @staff, '${req.body.senderEmail}')`, (err, recordset) => {
+                    VALUES (CURRENT_TIMESTAMP, 'M+M', 'RELATE', 'VISIT', '${notes}', @staff, '${req.body.senderEmail}')`, (err, recordset) => {
                         if (err) {
                             console.log(err)
                             console.log(req.body)
@@ -70,7 +70,7 @@ const POST = (req, res) => {
                 request.query(`DECLARE @staff int
                     SET @staff = (SELECT StaffIndex FROM [dbo].[tblStaff] WHERE StaffEMail = '${req.body.senderEmail}')
                     INSERT INTO dbo.MandM (EventDate, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
-                    VALUES (CURRENT_TIMESTAMP, 'M+M', 'RELATE', 'OPEN', '${req.body.notes}', @staff, '${req.body.senderEmail}')`, (err, recordset) => {
+                    VALUES (CURRENT_TIMESTAMP, 'M+M', 'RELATE', 'OPEN', '${notes}', @staff, '${req.body.senderEmail}')`, (err, recordset) => {
                         if (err) {
                             console.log(err)
                             console.log(req.body)
@@ -84,12 +84,12 @@ const POST = (req, res) => {
                 request.query(`DECLARE @staff int
                     SET @staff = (SELECT StaffIndex FROM [dbo].[tblStaff] WHERE StaffEMail = '${req.body.senderEmail}')
                     DECLARE @mentor int
-                    SET @mentor = (SELECT StaffIndex FROM [dbo].[tblStaff] WHERE StaffName = '${req.body.name}')
+                    SET @mentor = (SELECT StaffIndex FROM [dbo].[tblStaff] WHERE StaffName = '${name}')
                     DECLARE @email nvarchar(256)
-                    SET @email = (SELECT StaffEMail FROM [dbo].[tblStaff] WHERE StaffName = '${req.body.name}')
+                    SET @email = (SELECT StaffEMail FROM [dbo].[tblStaff] WHERE StaffName = '${name}')
                     INSERT INTO dbo.MandM (EventDate, EventPerson, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
-                    VALUES (CURRENT_TIMESTAMP, '${req.body.name}','M+M', 'RELATE', 'MENTOR', '${req.body.notes}', @staff, '${req.body.senderEmail}'),
-                            (CURRENT_TIMESTAMP, '${req.body.senderName}','M+M', 'RELATE', 'MENTOR', '${req.body.notes}', @mentor, @email)`, (err, recordset) => {
+                    VALUES (CURRENT_TIMESTAMP, '${name}','M+M', 'RELATE', 'MENTOR', '${notes}', @staff, '${req.body.senderEmail}'),
+                            (CURRENT_TIMESTAMP, '${req.body.senderName}','M+M', 'RELATE', 'MENTOR', '${notes}', @mentor, @email)`, (err, recordset) => {
                         if (err) {
                             console.log(err)
                             console.log(req.body)
@@ -117,7 +117,7 @@ const POST = (req, res) => {
                 request.query(`DECLARE @staff int
                     SET @staff = (SELECT StaffIndex FROM [dbo].[tblStaff] WHERE StaffEMail = '${req.body.senderEmail}')
                     INSERT INTO dbo.MandM (EventDate, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
-                    VALUES (CURRENT_TIMESTAMP, 'M+M', 'EDUCATE', 'TEACH', '${req.body.notes}', @staff, '${req.body.senderEmail}')`, (err, recordset) => {
+                    VALUES (CURRENT_TIMESTAMP, 'M+M', 'EDUCATE', 'TEACH', '${notes}', @staff, '${req.body.senderEmail}')`, (err, recordset) => {
                         if (err) {
                             console.log(err)
                             console.log(req.body)
@@ -131,7 +131,7 @@ const POST = (req, res) => {
                 request.query(`DECLARE @staff int
                     SET @staff = (SELECT StaffIndex FROM [dbo].[tblStaff] WHERE StaffEMail = '${req.body.senderEmail}')
                     INSERT INTO dbo.MandM (EventDate, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
-                    VALUES (CURRENT_TIMESTAMP, 'M+M', 'EDUCATE', 'ATTEND', '${req.body.notes}', @staff, '${req.body.senderEmail}')`, (err, recordset) => {
+                    VALUES (CURRENT_TIMESTAMP, 'M+M', 'EDUCATE', 'ATTEND', '${notes}', @staff, '${req.body.senderEmail}')`, (err, recordset) => {
                         if (err) {
                             console.log(err)
                             console.log(req.body)
@@ -145,7 +145,7 @@ const POST = (req, res) => {
                 request.query(`DECLARE @staff int
                     SET @staff = (SELECT StaffIndex FROM [dbo].[tblStaff] WHERE StaffEMail = '${req.body.senderEmail}')
                     INSERT INTO dbo.MandM (EventDate, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
-                    VALUES (CURRENT_TIMESTAMP, 'M+M', 'RECRUIT', 'EVENT', '${req.body.notes}', @staff, '${req.body.senderEmail}')`, (err, recordset) => {
+                    VALUES (CURRENT_TIMESTAMP, 'M+M', 'RECRUIT', 'EVENT', '${notes}', @staff, '${req.body.senderEmail}')`, (err, recordset) => {
                         if (err) {
                             console.log(err)
                             console.log(req.body)
@@ -159,7 +159,7 @@ const POST = (req, res) => {
                 request.query(`DECLARE @staff int
                     SET @staff = (SELECT StaffIndex FROM [dbo].[tblStaff] WHERE StaffEMail = '${req.body.senderEmail}')
                     INSERT INTO dbo.MandM (EventDate, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
-                    VALUES (CURRENT_TIMESTAMP, 'M+M', 'RECRUIT', 'INTVW', '${req.body.notes}', @staff, '${req.body.senderEmail}')`, (err, recordset) => {
+                    VALUES (CURRENT_TIMESTAMP, 'M+M', 'RECRUIT', 'INTVW', '${notes}', @staff, '${req.body.senderEmail}')`, (err, recordset) => {
                         if (err) {
                             console.log(err)
                             console.log(req.body)

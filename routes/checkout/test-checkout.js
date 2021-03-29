@@ -47,6 +47,7 @@ const THISOFFICE = (req, res) => {
         ,CONVERT(DATETIME, [CheckedOut], 120) AS CheckedOut
         ,ImagePath
         ,OfficeCode
+        ,Number
         FROM dbo.OpenOffices
         INNER JOIN dbo.tblStaff S ON EmployeeID = S.StaffIndex
         WHERE Name = '${id}';`, (err, recordset) => {
@@ -63,8 +64,9 @@ const CHECKOUT = (req, res) => {
     let {email, name, location, site, standUp, checkedOut, checkedIn, image, number} = req.body
     let patt = /.'/g
     if (patt.test(location)) {
-        location = location.replace("'", "''")
+        location = location.replace(patt, "''")
     }
+
     let randexp = new RandExp(/[1-9]\d\d\d\d\d/)
 
     sql.connect(config, () => {

@@ -103,7 +103,7 @@ const BASE = (req, res) => {
         
                             SELECT S.StaffIndex, S.StaffName, S.StaffCode, (SELECT TOP 1 EventDate
                                 FROM dbo.MandM
-                                WHERE EventPerson = S.StaffName
+                                WHERE EventPerson = S.StaffName AND EventAction = 'HR-LEADER'
                                 ORDER BY EventDate DESC) AS [LastDate]
                             FROM dbo.tblStaff S
                             WHERE S.StaffAttribute = @staffCategory 

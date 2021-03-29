@@ -13,14 +13,23 @@ const config = {
 
 const REQUEST = (req, res) => {
 
-    console.log(req.body)
+    let patt = /.'/g
+    let name = req.body.name
+    if (patt.test(name)) {
+        name = name.replace(patt, "''")
+    }
+
+    let project = req.body.project
+    if (patt.test(project)) {
+        project = project.replace(patt, "''")
+    }
 
     sql.connect(config, () => {
         let request = new sql.Request()
         request.query(`DECLARE @staff int
             SET @staff = (SELECT StaffIndex FROM [dbo].[tblStaff] WHERE StaffEMail = '${req.body.senderEmail}')
             INSERT INTO dbo.MandM (EventDate, EventPerson, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
-            VALUES (CURRENT_TIMESTAMP, '${req.body.name}','M+M', 'FEEDBACK', 'REQUEST', 'Requesting ROLO for ${req.body.project} Project', @staff, '${req.body.senderEmail}')`, (err, recordset) => {
+            VALUES (CURRENT_TIMESTAMP, '${name}','M+M', 'FEEDBACK', 'REQUEST', 'Requesting ROLO for ${project} Project', @staff, '${req.body.senderEmail}')`, (err, recordset) => {
                 if (err) {
                     console.log(err)
                 }

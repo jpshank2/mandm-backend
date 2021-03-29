@@ -28,7 +28,7 @@ let transporter = nodemailer.createTransport({
 const RECRUIT = (info) => {
     let patt = /.''/g
     if (patt.test(info.notes)) {
-        info.notes = info.notes.replace("''", "'")
+        info.notes = info.notes.replaceAll("''", "'")
     }
     switch(info.option) {
         case 0:
@@ -68,7 +68,7 @@ const RECRUIT = (info) => {
 const FEEDBACK = info => {
     let patt = /.''/g
     if (patt.test(info.notes)) {
-        info.notes = info.notes.replace("''", "'")
+        info.notes = info.notes.replaceAll("''", "'")
     }
     transporter.sendMail({
         from: process.env.EM_USER,
@@ -83,10 +83,10 @@ const FEEDBACK = info => {
 const RELATE = info => {
     let patt = /.''/g
     if (patt.test(info.notes)) {
-        info.notes = info.notes.replace("''", "'")
+        info.notes = info.notes.replaceAll("''", "'")
     }
     if (patt.test(info.name)) {
-        info.name = info.name.replace("''", "'")
+        info.name = info.name.replaceAll("''", "'")
     }
     switch(info.option) {
         case 2:
@@ -135,7 +135,7 @@ const RELATE = info => {
 const EDUCATE = info => {
     let patt = /.''/g
     if (patt.test(info.notes)) {
-        info.notes = info.notes.replace("''", "'")
+        info.notes = info.notes.replaceAll("''", "'")
     }
     switch(info.option) {
         case 6:
@@ -162,9 +162,22 @@ const EDUCATE = info => {
 }
 
 const REQUEST = info => {
+
+    let patt = /.''/g
+    
+    let name = info.name
+    if (patt.test(name)) {
+        name = name.replaceAll("''", "'")
+    }
+
+    let project = info.project
+    if (patt.test(project)) {
+        project = project.replaceAll("''", "'")
+    }
+
     sql.connect(config, () => {
         let request = new sql.Request()
-        request.query(`SELECT StaffEMail FROM dbo.tblStaff WHERE StaffName = '${info.name}'`, (err, recordset) => {
+        request.query(`SELECT StaffEMail FROM dbo.tblStaff WHERE StaffName = '${name}'`, (err, recordset) => {
             if (err) {console.log(err)}
             transporter.sendMail({
                 from: process.env.EM_USER,
