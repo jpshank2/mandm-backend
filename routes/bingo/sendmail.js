@@ -3,12 +3,25 @@ const sql = require("mssql");
 const moment = require("moment")
 
 const config = {
-    user: process.env.DV_DB_USER,
-    password: process.env.DV_DB_PASS,
-    server: process.env.DV_DB_SERVER,
-    database: process.env.DV_DB_DB,
-    options: {
-        encrypt: true
+    datawarehouse: {
+        user: process.env.DV_DB_USER,
+        password: process.env.DV_DB_PASS,
+        server: process.env.DV_DB_SERVER,
+        database: process.env.DV_DB_DB,
+        options: {
+            encrypt: true,
+            enableArithAbort: true
+        }
+    },
+    engine: {
+        user: process.env.DB_USER,
+        password: process.env.DB_PASS,
+        server: process.env.DB_SERVER,
+        database: process.env.DB_DB,
+        options: {
+            encrypt: true,
+            enableArithAbort: true
+        }
     }
 }
 
@@ -43,7 +56,7 @@ let transporter = nodemailer.createTransport({
 
 let EMAIL = number => {
     try {
-        let messages = []
+        //let messages = []
         let letter = 'B'
         let diff = number - 15
         if (diff <= 0) {
@@ -57,68 +70,215 @@ let EMAIL = number => {
         } else {
             letter = 'O'
         }
-        sql.connect(config)
-            .then(() => {
-                new sql.Request()
-                    .query(`SELECT S.StaffEMail
-                    FROM [DataWarehouse].[dbo].[Bingo] B
-                    INNER JOIN dbo.tblStaff S ON B.BingoCard = StaffBingo
-                    WHERE BingoNumber = ${number}`)
-                    .then(recordset => {
-                        if (recordset == null || recordset === 0) {
-                            return
-                        }
-                        recordset.recordsets[0].forEach((email, index) => {
-                            if (index === 0 ) {
-                                messages.push({
-                                    from: process.env.EM_USER,
-                                    to: email.StaffEMail,
-                                    bcc: 'kmoore@bmss.com; jeremyshank@bmss.com; lpence@bmss.com',
-                                    subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
-                                    html: `<p>You had ${letter} ${number} on your Bingo Card! Remember to enter your time for yesterday by noon today!</p>`
-                                })
-                            } else {
-                                messages.push({
-                                    from: process.env.EM_USER,
-                                    to: email.StaffEMail,
-                                    subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
-                                    html: `<p>You had ${letter} ${number} on your Bingo Card!</p><p>Remember to enter your time for yesterday by noon today!</p>`
-                                })
-                            }
+
+        const drawUsers = async () => {
+            let staff = []
+
+            let pool = new sql.ConnectionPool(config.datawarehouse)
+            let drawPool = await pool.connect()
+            let data = await drawPool.request()
+                .input('number', sql.Int, number)
+                .query(`SELECT BC.BingoUser
+                FROM [dbo].[Bingo] B
+                INNER JOIN dbo.BingoCards BC ON BC.BingoCard = B.BingoCard
+                WHERE BingoNumber = @number AND BC.BingoUser IS NOT NULL`)
+            staff = data.recordset
+            pool.close()
+            return staff
+        }
+
+        const noDrawUsers = async () => {
+            let staff = []
+
+            let pool = new sql.ConnectionPool(config.datawarehouse)
+            let noDrawPool = await pool.connect()
+            let data = await noDrawPool.request()
+                .input('number', sql.Int, number)
+                .query(`SELECT DISTINCT BC.BingoUser
+                FROM [dbo].[Bingo] B
+                INNER JOIN dbo.BingoCards BC ON BC.BingoCard = B.BingoCard
+                WHERE B.BingoCard NOT IN (SELECT BingoCard FROM dbo.Bingo WHERE BingoNumber = 15) AND BC.BingoUser IS NOT NULL`)
+            staff = data.recordset
+            pool.close()
+            return staff
+        }
+
+        const createDrawEmails = async (userArray) => {
+            let messages = []
+            let pool = new sql.ConnectionPool(config.engine)
+            let drawEmailPool = await pool.connect()
+            for (let i = 0; i < userArray.length; i++) {
+                let data = await drawEmailPool.request()
+                    .input('staff', sql.Int, userArray[i].BingoUser)
+                    .query(`SELECT StaffEMail FROM dbo.tblStaff WHERE StaffIndex = @staff`)
+                if (i === 0) {
+                    messages.push({
+                        from: process.env.EM_USER,
+                        to: data.recordset[0].StaffEMail,
+                        bcc: 'kmoore@bmss.com; jeremyshank@bmss.com; lpence@bmss.com',
+                        subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
+                        html: `<p>You had ${letter} ${number} on your Bingo Card! Remember to enter your time for yesterday by noon today!</p>`
+                    })
+                } else {
+                    messages.push({
+                        from: process.env.EM_USER,
+                        to: data.recordset[0].StaffEMail,
+                        subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
+                        html: `<p>You had ${letter} ${number} on your Bingo Card! Remember to enter your time for yesterday by noon today!</p>`
+                    })
+                }
+            }
+            pool.close()
+            return messages
+        }
+
+        const createNoDrawEmails = async (userArray) => {
+            let messages = []
+            let pool = new sql.ConnectionPool(config.engine)
+            let noDrawEmailPool = await pool.connect()
+            for (let i = 0; i < userArray.length; i++) {
+                let data = await noDrawEmailPool.request()
+                    .input('staff', sql.Int, userArray[i].BingoUser)
+                    .query(`SELECT StaffEMail FROM dbo.tblStaff WHERE StaffIndex = @staff`)
+                messages.push({
+                    from: process.env.EM_USER,
+                    to: data.recordset[0].StaffEMail,
+                    subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
+                    html: `<p>You did not have ${letter} ${number} on your Bingo Card. Better luck tomorrow!</p><p>Remember to enter your time for yesterday by noon today!</p>`
+                })
+            }
+            pool.close()
+            return messages
+        }
+
+        drawUsers()
+            .then(result =>{
+                createDrawEmails(result)
+                    .then(emails => {
+                        emails.forEach(email => {
+                            pooledTransporter.sendMail(email)
+                            // console.log(email)
                         })
                     })
                     .catch(err => {
-                        console.log(err)
+                        console.log(`Bingo createDrawEmails Error:\n${err}`)
                     })
-            }).then(() => {
-                    new sql.Request()
-                        .query(`SELECT DISTINCT S.StaffEMail
-                        FROM [DataWarehouse].[dbo].[Bingo] B
-                        INNER JOIN dbo.tblStaff S ON B.BingoCard = StaffBingo
-                        WHERE BingoCard NOT IN (SELECT BingoCard FROM dbo.Bingo WHERE BingoNumber = ${number})`)
-                        .then(recordset => {
-                            if (recordset == null || recordset === 0) {
-                                return
-                            }
-                            recordset.recordsets[0].forEach(email => {
-                                messages.push({
-                                    from: process.env.EM_USER,
-                                    to: email.StaffEMail,
-                                    subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
-                                    html: `<p>You did not have ${letter} ${number} on your Bingo Card. Better luck tomorrow!</p><p>Remember to enter your time for yesterday by noon today!</p>`
+            })
+            .then(() => {
+                noDrawUsers()
+                    .then(result => {
+                        createNoDrawEmails(result)
+                            .then(emails => {
+                                emails.forEach(email => {
+                                    pooledTransporter.sendMail(email)
+                                    // console.log(email)
                                 })
                             })
-                        })
-                        .then(() => {
-                            messages.forEach(message => {
-                                pooledTransporter.sendMail(message)
+                            .catch(err => {
+                                console.log(`Bingo createNoDrawEmails Error:\n${err}`)
                             })
-                        }).catch(err => {
-                            console.log(err)
-                        })
-            }).catch(err => {
-                console.log(err)
+                    })
+                    .catch(err => {
+                        console.log(`Bingo noDrawUsers Error:\n${err}`)
+                    })
             })
+            .catch(err => {
+                console.log(`Bingo drawUsers Outer Error:\n${err}`)
+            })
+        //     .then(result => {
+        //         console.log(result)
+        //         let drawPool = await sql.connect(config.engine)
+        //         const sqlQuery = `SELECT StaffEMail FROM dbo.tblStaff WERE StaffIndex = @staff`
+        //         let messages = []
+        //         let getEmails = await drawPool.request()
+        //                 .input('staff', sql.Int, result[0])
+        //                 .query(sqlQuery)
+        //         messages.push({
+        //             from: process.env.EM_USER,
+        //             to: getEmails.recordset[0].StaffEMail,
+        //             bcc: 'kmoore@bmss.com; jeremyshank@bmss.com; lpence@bmss.com',
+        //             subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
+        //             html: `<p>You had ${letter} ${number} on your Bingo Card! Remember to enter your time for yesterday by noon today!</p>`
+        //         })
+        //         // for (let i = 0; i < result.length; i++) {
+        //         //     let getEmails = await drawPool.request()
+        //         //         .input('staff', sql.Int, result[i])
+        //         //         .query(sqlQuery)
+        //         //     if (i === 0) {
+        //         //         messages.push({
+        //         //             from: process.env.EM_USER,
+        //         //             to: getEmails.recordset[0].StaffEMail,
+        //         //             bcc: 'kmoore@bmss.com; jeremyshank@bmss.com; lpence@bmss.com',
+        //         //             subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
+        //         //             html: `<p>You had ${letter} ${number} on your Bingo Card! Remember to enter your time for yesterday by noon today!</p>`
+        //         //         })
+        //         //     } else {
+        //         //         messages.push({
+        //         //             from: process.env.EM_USER,
+        //         //             to: getEmails.recordset[0].StaffEMail,
+        //         //             subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
+        //         //             html: `<p>You had ${letter} ${number} on your Bingo Card! Remember to enter your time for yesterday by noon today!</p>`
+        //         //         })
+        //         //     }
+        //         // }
+        //         drawPool.close()
+        //         return messages
+        //     })
+        //     .then(emails => {
+        //         emails.forEach(email => {
+        //             //pooledTransporter.sendMail(email)
+        //             console.log(email)
+        //         })
+        //     })
+        //     // .then(() => {
+        //     //     noDrawUsers()
+        //     //         .then(result => {
+        //     //             const engineConnection = new sql.ConnectionPool(config.engine)
+        //     //             engineConnection.connect()
+        //     //                 .then(noDrawPool => {
+        //     //                     const sqlQuery = `SELECT StaffEMail FROM dbo.tblStaff WERE StaffIndex = @staff`
+        //     //                     let messages = []
+        //     //                     for (let i = 0; i < result.length; i++) {
+        //     //                         let getEmails = new sql.Request(noDrawPool)
+        //     //                             .input('staff', sql.Int, result[i])
+        //     //                             .query(sqlQuery)
+        //     //                         if (i === 0) {
+        //     //                             messages.push({
+        //     //                                 from: process.env.EM_USER,
+        //     //                                 to: getEmails.recordset[0].StaffEMail,
+        //     //                                 bcc: 'kmoore@bmss.com; jeremyshank@bmss.com; lpence@bmss.com',
+        //     //                                 subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
+        //     //                                 html: `<p>You had ${letter} ${number} on your Bingo Card! Remember to enter your time for yesterday by noon today!</p>`
+        //     //                             })
+        //     //                         } else {
+        //     //                             messages.push({
+        //     //                                 from: process.env.EM_USER,
+        //     //                                 to: getEmails.recordset[0].StaffEMail,
+        //     //                                 subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
+        //     //                                 html: `<p>You had ${letter} ${number} on your Bingo Card! Remember to enter your time for yesterday by noon today!</p>`
+        //     //                             })
+        //     //                         }
+        //     //                     }
+        //     //                     noDrawPool.close()
+        //     //                     return messages
+        //     //                 })
+        //     //                 .then(emails => {
+        //     //                     emails.forEach(email => {
+        //     //                         //pooledTransporter.sendMail(email)
+        //     //                         console.log(email)
+        //     //                     })
+        //     //                 })
+        //     //                 .catch(err => {
+        //     //                     console.log(`Bingo noDrawUsers Inner Error:\n${err}`)
+        //     //                 })
+        //     //         })
+        //     //         .catch(err => {
+        //     //             console.log(`Bingo noDrawUsers Outer Error:\n${err}`)
+        //     //         })
+        //     // })
+        //     .catch(err => {
+        //         console.log(`Bingo drawUsers Outer Error:\n${err}`)
+        //     })
     } catch (err) {
         console.log(err)
     }

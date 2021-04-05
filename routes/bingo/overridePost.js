@@ -11,28 +11,38 @@ const devConfig = {
 }
 
 const POST = (req, res) => {
-     
-    sql.connect(devConfig, () => {
-        req.body.override.forEach(person => {
-            if (req.body.override.indexOf(person) === req.body.override.lastIndexOf(person)) {
-                let request = new sql.Request()
-                request.query(`DECLARE @card int
-                            SET @card = (SELECT StaffBingo FROM dbo.tblStaff WHERE StaffIndex = ${person} AND StaffEnded IS NULL)
-                            DECLARE @missed int
-                            SET @missed = (SELECT BingoMissed FROM dbo.Bingo WHERE BingoCard = @card AND BingoNumber = 0)
-                            
-                            UPDATE dbo.Bingo
-                            SET BingoDate = CONVERT(DATE, DATEADD(DAY, -1, BingoDate))
-                            WHERE BingoCard = @card AND CONVERT(DATE, BingoDate) = CONVERT(DATE, GETDATE()) AND BingoNumber = 0
-                            
-                            UPDATE dbo.Bingo
-                            SET BingoMissed = @missed - 1
-                            WHERE BingoCard = @card`, (err, recordset) => {
-                                if (err) {console.log(err);console.log("overridePost.js post error")}
-                            })
+    const overridePost = async (req) => {
+        let pool = await sql.connect(devConfig)
+        for (let i = 0; i < req.body.override.length; i++) {
+            if (i === req.body.override.lastIndexOf(req.body.override[i])) {
+                let data = pool.request()
+                    .input('staff', sql.Int, req.body.override[i])
+                    .query(`DECLARE @card int
+                    SET @card = (SELECT BingoCard FROM dbo.BingoCards WHERE BingoUser = @staff)
+                    DECLARE @missed int
+                    SET @missed = (SELECT BingoMissed FROM dbo.Bingo WHERE BingoCard = @card AND BingoNumber = 0)
+                    
+                    UPDATE dbo.Bingo
+                    SET BingoDate = CONVERT(DATE, DATEADD(DAY, -1, BingoDate))
+                    WHERE BingoCard = @card AND CONVERT(DATE, BingoDate) = CONVERT(DATE, GETDATE()) AND BingoNumber = 0
+                    
+                    UPDATE dbo.Bingo
+                    SET BingoMissed = @missed - 1
+                    WHERE BingoCard = @card`)
+                console.log(data)
             }
+        }
+        pool.close()
+        return true
+    }
+
+    overridePost(req)
+        .then(() => {
+            res.send('Thanks for overriding Bingo!')
         })
-    })
+        .catch(err => {
+            console.log(`Bingo overridePost Error:\n${err}`)
+        })
 }
 
 module.exports = {

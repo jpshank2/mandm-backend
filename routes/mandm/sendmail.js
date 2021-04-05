@@ -1,4 +1,3 @@
-const { request } = require('express')
 const nodemailer = require('nodemailer')
 const sql = require('mssql')
 
@@ -28,7 +27,7 @@ let transporter = nodemailer.createTransport({
 const RECRUIT = (info) => {
     let patt = /.''/g
     if (patt.test(info.notes)) {
-        info.notes = info.notes.replaceAll("''", "'")
+        info.notes = info.notes.replace(patt, "'")
     }
     switch(info.option) {
         case 0:
@@ -68,7 +67,7 @@ const RECRUIT = (info) => {
 const FEEDBACK = info => {
     let patt = /.''/g
     if (patt.test(info.notes)) {
-        info.notes = info.notes.replaceAll("''", "'")
+        info.notes = info.notes.replace(patt, "'")
     }
     transporter.sendMail({
         from: process.env.EM_USER,
@@ -83,10 +82,10 @@ const FEEDBACK = info => {
 const RELATE = info => {
     let patt = /.''/g
     if (patt.test(info.notes)) {
-        info.notes = info.notes.replaceAll("''", "'")
+        info.notes = info.notes.replace(patt, "'")
     }
     if (patt.test(info.name)) {
-        info.name = info.name.replaceAll("''", "'")
+        info.name = info.name.replace(patt, "'")
     }
     switch(info.option) {
         case 2:
@@ -135,7 +134,7 @@ const RELATE = info => {
 const EDUCATE = info => {
     let patt = /.''/g
     if (patt.test(info.notes)) {
-        info.notes = info.notes.replaceAll("''", "'")
+        info.notes = info.notes.replace(patt, "'")
     }
     switch(info.option) {
         case 6:
@@ -167,24 +166,24 @@ const REQUEST = info => {
     
     let name = info.name
     if (patt.test(name)) {
-        name = name.replaceAll("''", "'")
+        name = name.replace(patt, "'")
     }
 
     let project = info.project
     if (patt.test(project)) {
-        project = project.replaceAll("''", "'")
+        project = project.replace(patt, "'")
     }
 
     sql.connect(config, () => {
         let request = new sql.Request()
-        request.query(`SELECT StaffEMail FROM dbo.tblStaff WHERE StaffName = '${name}'`, (err, recordset) => {
+        request.query(`SELECT StaffEMail FROM dbo.tblStaff WHERE StaffName = '${info.name}'`, (err, recordset) => {
             if (err) {console.log(err)}
             transporter.sendMail({
                 from: process.env.EM_USER,
                 to: recordset.recordsets[0][0].StaffEMail,
                 cc: info.senderEmail,
-                subject: `${info.senderName} is Requesting a ROLO from ${info.name}`,
-                html: `<p>${info.name},</p><p>${info.senderName} is requesting a ROLO for the ${info.project} project</p><p>Thanks in advance for submitting a ROLO!</p>`
+                subject: `${info.senderName} is Requesting a ROLO from ${name}`,
+                html: `<p>${name},</p><p>${info.senderName} is requesting a ROLO for the ${project} project</p><p>Thanks in advance for submitting a ROLO!</p>`
             })
         })
     })

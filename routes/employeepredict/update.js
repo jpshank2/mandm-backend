@@ -1,20 +1,32 @@
 const sql = require("mssql")
 
 const config = {
-    user: process.env.DV_DB_USER,
-    password: process.env.DV_DB_PASS,
-    server: process.env.DV_DB_SERVER,
-    database: process.env.DV_DB_DB,
-    options: {
-        encrypt: true
+    datawarehouse: {
+        user: process.env.DV_DB_USER,
+        password: process.env.DV_DB_PASS,
+        server: process.env.DV_DB_SERVER,
+        database: process.env.DV_DB_DB,
+        options: {
+            encrypt: true,
+            enableArithAbort: true
+        }
+    },
+    engine: {
+        user: process.env.DB_USER,
+        password: process.env.DB_PASS,
+        server: process.env.DB_SERVER,
+        database: process.env.DB_DB,
+        options: {
+            encrypt: true,
+            enableArithAbort: true
+        }
     }
 }
 
 const KUDOS = (info) => {
-    let project = info.description 
-    let description = info.description
-    let name = info.name
+    let { project, description, name, senderEmail, cornerstone } = info
     let patt = /.'/g
+
     if (patt.test(description)) {
         description = description.replace(patt, "''")
     }
@@ -24,95 +36,166 @@ const KUDOS = (info) => {
     if (patt.test(name)) {
         name = name.replace(patt, "''")
     }
-    sql.connect(config, () => {
-        let request = new sql.Request()
-        request.query(`DECLARE @staffIndex int
-                    SET @staffIndex = (SELECT StaffIndex FROM [dbo].[tblStaff] WHERE StaffEMail = '${info.senderEmail}')
-                    INSERT INTO [dbo].[MandM](EventDate, EventPerson, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
-                    VALUES (CURRENT_TIMESTAMP, '${name}', 'M+M', 'FEEDBACK', 'KUDOS', '${info.cornerstone} - ${project}: ${description}', @staffIndex, '${info.senderEmail}');`, 
-                    (err, recordset) => {
-                        if (err) {
-                            console.log(err)
-                            console.log("update.js KUDOS error")
-                        }
-                    })
-    })
+
+    const postKUDOS = async (info) => {
+        let staffIndex = 0
+
+        let pool = await sql.connect(config.engine)
+        let data = await pool.request()
+            .input('senderEmail', sql.NVarChar, info.senderEmail)
+            .query(`SELECT StaffIndex FROM dbo.tblStaff WHERE StaffEMail = @senderEmail`)
+        staffIndex = data.recordset[0].StaffIndex
+        pool.close()
+        return staffIndex
+    }
+
+    postKUDOS(info)
+        .then(result => {
+            const dataWarehouseConnection = new sql.ConnectionPool(config.datawarehouse)
+            dataWarehouseConnection.connect()
+                .then(pool => {
+                    const sqlQuery = `INSERT INTO [dbo].[MandM](EventDate, EventPerson, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
+                    VALUES (CURRENT_TIMESTAMP, @recipient, 'M+M', 'FEEDBACK', 'KUDOS', CONCAT(@cornerstone, ' - ', @project, ': ', @description), @staffIndex, @senderEmail);`
+
+                    return new sql.Request(pool)
+                        .input('recipient', sql.NVarChar, name)
+                        .input('cornerstone', sql.NVarChar, cornerstone)
+                        .input('project', sql.NVarChar, project)
+                        .input('description', sql.NVarChar, description)
+                        .input('staffIndex', sql.Int, result)
+                        .input('senderEmail', sql.NVarChar, senderEmail)
+                        .query(sqlQuery)
+                })
+                .then(() => {
+                    return dataWarehouseConnection.close()
+                })
+                .catch(err => {
+                    console.log(`KUDOS error:\n${err}\n${info}`)
+                })
+
+        })
+        .catch(err => {
+            console.log(`KUDOS error:\n${err}\n${info}`)
+        })
 }
 
 const UPWARD = info => {
-    console.log(info)
-    let retain = info.retain
+    let { project, name, senderEmail, retain, lose, rating } = info
     let patt = /.'/g
+
     if (patt.test(retain)) {
         retain = retain.replace(patt, "''")
     }
-
-    let lose = info.lose
     if (patt.test(lose)) {
         lose = lose.replace(patt, "''")
     }
-
-    let name = info.name
+    if (patt.test(project)) {
+        project = project.replace(patt, "''")
+    }
     if (patt.test(name)) {
         name = name.replace(patt, "''")
     }
 
-    let project = info.project
-    if (patt.test(project)) {
-        project = project.replace(patt, "''")
+    const postUpward = async (info) => {
+        let staffIndex = 0
+
+        let pool = await sql.connect(config.engine)
+        let data = await pool.request()
+            .input('senderEmail', sql.NVarChar, info.senderEmail)
+            .query(`SELECT StaffIndex FROM dbo.tblStaff WHERE StaffEMail = @senderEmail`)
+        staffIndex = data.recordset[0].StaffIndex
+        pool.close()
+        return staffIndex
     }
 
-    sql.connect(config, () => {
-        let request = new sql.Request()
-        request.query(`DECLARE @staffIndex int
-        SET @staffIndex = (SELECT StaffIndex FROM [dbo].[tblStaff] WHERE StaffEMail = '${info.senderEmail}')
-        INSERT INTO [dbo].[MandM](EventDate, EventPerson, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
-        VALUES (CURRENT_TIMESTAMP, '${name}', 'M+M', 'FEEDBACK', 'UPWARD', '${project}: Rating - ${info.rating}; Retain - ${retain}; Lose - ${lose}', @staffIndex, '${info.senderEmail}');`, 
-        (err, recordset) => {
-            if (err) {
-                console.log(err)
-                console.log("update.js UPWARD error")
-            }
+    postUpward(info)
+        .then(result => {
+            const dataWarehouseConnection = new sql.ConnectionPool(config.datawarehouse)
+            dataWarehouseConnection.connect()
+                .then(pool => {
+                    const sqlQuery = `INSERT INTO [dbo].[MandM](EventDate, EventPerson, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
+                    VALUES (CURRENT_TIMESTAMP, @recipient, 'M+M', 'FEEDBACK', 'UPWARD', CONCAT(@project, '; Rating - ', @rating, '; Retain - ', @retain '; Lose - ', @lose), @staffIndex, @senderEmail);`
+
+                    return new sql.Request(pool)
+                        .input('recipient', sql.NVarChar, name)
+                        .input('rating', sql.NVarChar, rating)
+                        .input('project', sql.NVarChar, project)
+                        .input('retain', sql.NVarChar, retain)
+                        .input('lose', sql.NVarChar, lose)
+                        .input('staffIndex', sql.Int, result)
+                        .input('senderEmail', sql.NVarChar, senderEmail)
+                        .query(sqlQuery)
+                })
+                .then(() => {
+                    return dataWarehouseConnection.close()
+                })
+                .catch(err => {
+                    console.log(`Upward ROLO error:\n${err}\n${info}`)
+                })
+
         })
-    })
+        .catch(err => {
+            console.log(`Upward ROLO error:\n${err}\n${info}`)
+        })
 }
 
 const DOWNWARD = info => {
-    console.log(info)
-    let retain = info.retain
+    let { project, name, senderEmail, retain, lose, rating } = info
     let patt = /.'/g
+
     if (patt.test(retain)) {
         retain = retain.replace(patt, "''")
     }
-
-    let lose = info.lose
     if (patt.test(lose)) {
         lose = lose.replace(patt, "''")
     }
-
-    let name = info.name
+    if (patt.test(project)) {
+        project = project.replace(patt, "''")
+    }
     if (patt.test(name)) {
         name = name.replace(patt, "''")
     }
 
-    let project = info.project
-    if (patt.test(project)) {
-        project = project.replace(patt, "''")
+    const postDownward = async (info) => {
+        let staffIndex = 0
+
+        let pool = await sql.connect(config.engine)
+        let data = await pool.request()
+            .input('senderEmail', sql.NVarChar, info.senderEmail)
+            .query(`SELECT StaffIndex FROM dbo.tblStaff WHERE StaffEMail = @senderEmail`)
+        staffIndex = data.recordset[0].StaffIndex
+        pool.close()
+        return staffIndex
     }
 
-    sql.connect(config, () => {
-        let request = new sql.Request()
-        request.query(`DECLARE @staffIndex int
-        SET @staffIndex = (SELECT StaffIndex FROM [dbo].[tblStaff] WHERE StaffEMail = '${info.senderEmail}')
-        INSERT INTO [dbo].[MandM](EventDate, EventPerson, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
-        VALUES (CURRENT_TIMESTAMP, '${name}', 'M+M', 'FEEDBACK', 'DOWNWARD', '${project}: Rating - ${info.rating}; Retain - ${retain}; Lose - ${lose}', @staffIndex, '${info.senderEmail}');`, 
-        (err, recordset) => {
-            if (err) {
-                console.log(err)
-                console.log("update.js DOWNWARD error")
-            }
+    postDownward(info)
+        .then(result => {
+            const dataWarehouseConnection = new sql.ConnectionPool(config.datawarehouse)
+            dataWarehouseConnection.connect()
+                .then(pool => {
+                    const sqlQuery = `INSERT INTO [dbo].[MandM](EventDate, EventPerson, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
+                    VALUES (CURRENT_TIMESTAMP, @recipient, 'M+M', 'FEEDBACK', 'UPWARD', CONCAT(@project, '; Rating - ', @rating, '; Retain - ', @retain '; Lose - ', @lose), @staffIndex, @senderEmail);`
+
+                    return new sql.Request(pool)
+                        .input('recipient', sql.NVarChar, name)
+                        .input('rating', sql.NVarChar, rating)
+                        .input('project', sql.NVarChar, project)
+                        .input('retain', sql.NVarChar, retain)
+                        .input('lose', sql.NVarChar, lose)
+                        .input('staffIndex', sql.Int, result)
+                        .input('senderEmail', sql.NVarChar, senderEmail)
+                        .query(sqlQuery)
+                })
+                .then(() => {
+                    return dataWarehouseConnection.close()
+                })
+                .catch(err => {
+                    console.log(`Downward ROLO error:\n${err}\n${info}`)
+                })
         })
-    })
+        .catch(err => {
+            console.log(`Downward ROLO error:\n${err}\n${info}`)
+        })
 }
 
 module.exports = {

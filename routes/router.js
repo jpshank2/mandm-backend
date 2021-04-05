@@ -98,6 +98,8 @@ router.get("/employees/:name", (req, res) => {
     EPredict.BASE(req, res)
 })
 
+// app.use('/employees', require('./employeepredict/employeepredict.js'))
+
 router.post("/employees/", (req, res, next) => {
     EPredict.KUDOS(req, res, next)
 })
