@@ -40,7 +40,7 @@ const BASE = (req, res) => {
         let pool = await sql.connect(config.engine)
         let data = await pool.request()
             .input('staff', sql.NVarChar, name)
-            .query(`  SELECT [StaffIndex], [StaffName], [StaffEMail]
+            .query(`SELECT [StaffIndex], [StaffName], [StaffEMail]
             FROM [dbo].[tblStaff]
             WHERE StaffEnded IS NULL AND
             StaffName LIKE CONCAT(@staff, '%');`)

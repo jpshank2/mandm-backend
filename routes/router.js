@@ -176,7 +176,7 @@ router.get("/offices/nonstandup/:site", (req, res) => {
 })
 
 router.get("/staff/:id", (req, res) => {
-    OfficeCheckOut.STAFF(req, res)
+    TestSiteOfficeCheckOut.STAFF(req, res)
 })
 
 router.get("/", (req, res) => {
