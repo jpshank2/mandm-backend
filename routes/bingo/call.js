@@ -1,18 +1,6 @@
 const sql = require("mssql");
 // const CronJob = require('cron').CronJob
 const SendMail = require("./sendmail.js")
-// const CheckWin = require("./checkwin.js")
-
-// const job = new CronJob(
-//     '00 45 16 * * 1-5', () => {
-//         CheckWin.BASE()
-//     },
-//     null,
-//     true,
-//     'America/Chicago'
-// )
-
-// job.start()
 
 const config = {
     user: process.env.DV_DB_USER,
@@ -20,66 +8,89 @@ const config = {
     server: process.env.DV_DB_SERVER,
     database: process.env.DV_DB_DB,
     options: {
-        encrypt: true
+        encrypt: true,
+        enableArithAbort: true
     }
 }
 
 const BASE = (req, res) => {
-    sql.connect(config, () => {
-        let request = new sql.Request()
-        request.query(`SELECT DISTINCT BingoNumber
-                        FROM dbo.Bingo
-                        WHERE BingoCalled = 0`, (err, recordset) => {
-                            if (err) {console.log(err); console.log("call.js base error")}
-                            let selection = Math.floor(Math.random() * recordset.recordsets[0].length)
-                            res.send(recordset.recordsets[0][selection])
-                        })
-                    })
+    const getNumbers = async () => {
+        let index = 0
+        let pool = await sql.connect(config)
+        let data = await pool.request()
+            .query(`SELECT DISTINCT BingoNumber FROM dbo.Bingo WHERE BingoCalled = 0`)
+        index = Math.floor(Math.random() * data.recordset.length)
+        
+        let number = data.recordset[index]
+        pool.close()
+        return number
+    }
+
+    getNumbers()
+        .then(result => {
+            res.send(result)
+        })
+        .catch(err => {
+            console.log(`Bingo getNumber Error:\n${err}`)
+        })
 }
 
 const DATES = (req, res) => {
-    sql.connect(config, () => {
-        let request = new sql.Request()
-        request.query(`SELECT DISTINCT BingoDate, BingoNumber
-        FROM dbo.Bingo
-        WHERE BingoCalled = 1 AND BingoNumber != 0`, (err, recordset) => {
-                            if (err) {console.log(err); console.log("call.js dates error")}
-                            res.send(recordset.recordsets[0])
-                        })
-                    })
+    const getPreviousCalled = async () => {
+        let called = []
+
+        let pool = await sql.connect(config)
+        let data = await pool.request()
+            .query(`SELECT DISTINCT BingoDate, BingoNumber FROM dbo.Bingo WHERE BingoCalled = 1 AND BingoNumber != 0`)
+        called = data.recordset
+        pool.close()
+        return called
+    }
+
+    getPreviousCalled()
+        .then(result => {
+            res.send(result)
+        })
+        .catch(err => {
+            console.log(`Bingo getPreviouslyCalled Error:\n${err}`)
+        })
 }
 
 const POST = (req, res) => {
-    sql.connect(config, () => {
-        let request = new sql.Request()
-        request.query(`UPDATE dbo.Bingo
-                        SET BingoCalled = 1, BingoDate = CONVERT(DATE, CURRENT_TIMESTAMP)
-                        FROM dbo.Bingo B
-                        WHERE BingoNumber = ${req.body.number}`, (err, recordset) => {
-                            if (err) {
-                                console.log(err)
-                                console.log("call.js post error")
-                            }
-                            SendMail.EMAIL(req.body.number)
-                        })
-    })
+    const updateCalledNumbers = async (req) => {
+        let pool = await sql.connect(config)
+        let data = await pool.request()
+            .input('number', sql.Int, req.body.number)
+            .query(`UPDATE dbo.Bingo SET BingoCalled = 1, BingoDate = CONVERT(DATE, CURRENT_TIMESTAMP) WHERE BingoNumber = @number`)
+        console.log(data)
+        pool.close()
+        return 1
+    }
+
+    updateCalledNumbers(req)
+        .then(() => {
+            SendMail.EMAIL(req.body.number)
+        })
+        .catch(err => {
+            console.log(`Bingo updateCalledNumbers Error:\n${err}`)
+        })
 }
 
 const RESET = (req, res) => {
-    sql.connect(config, () => {
-        let request = new sql.Request()
-        request.query(`UPDATE dbo.Bingo
-                        SET BingoCalled = 0, BingoDate = NULL, BingoMissed = 0
-                        WHERE BingoNumber != 0
-                        
-                        UPDATE dbo.Bingo
-                        SET BingoMissed = 0, BingoDate = NULL
-                        WHERE BingoNumber = 0`, (err, recordset) => {
-                            if (err) {
-                                console.log(err);console.log("call.js reset error")
-                            }
-                        })
-    })
+    const resetGame = async () => {
+        let pool = await sql.connect(config)
+        let data = await pool.request()
+            .query(`UPDATE dbo.Bingo SET BingoCalled = 0, BingoDate = NULL, BingoMissed = 0 WHERE BingoNumber != 0
+                    UPDATE dbo.Bingo SET BingoMissed = 0, BingoDate = NULL WHERE BingoNumber = 0`)
+        console.log(data)
+        pool.close()
+        return 1
+    }
+
+    resetGame()
+        .catch(err => {
+            console.log(`Bingo resetGame Error:\n${err}`)
+        })
 }
 
 module.exports = {

@@ -1,13 +1,40 @@
 const sql = require('mssql')
 
 const config = {
-    user: process.env.DV_DB_USER,
-    password: process.env.DV_DB_PASS,
-    server: process.env.DV_DB_SERVER,
-    database: process.env.DV_DB_DB,
-    options: {
-        encrypt: true
+    datawarehouse: {
+        user: process.env.DV_DB_USER,
+        password: process.env.DV_DB_PASS,
+        server: process.env.DV_DB_SERVER,
+        database: process.env.DV_DB_DB,
+        options: {
+            encrypt: true,
+            enableArithAbort: true
+        }
+    },
+    engine: {
+        user: process.env.DB_USER,
+        password: process.env.DB_PASS,
+        server: process.env.DB_SERVER,
+        database: process.env.DB_DB,
+        options: {
+            encrypt: true,
+            enableArithAbort: true
+        }
     }
+}
+
+const getStaffInfo = async (email) => {
+    let pool = new sql.ConnectionPool(config.engine)
+    let indexPool = await pool.connect()
+    let data = await indexPool.request()
+        .input('staff', sql.NVarChar, email)
+        .query(`SELECT S.StaffIndex, H.CatName
+        FROM dbo.tblStaff S
+        INNER JOIN tblStaffEx SE ON SE.StaffIndex = S.StaffIndex
+        INNER JOIN dbo.tblCategory H ON SE.StaffSubDepartment = H.Category AND H.CatType = 'SUBDEPT' WHERE StaffEMail = @staff`)
+    let staffInfo = data.recordset[0]
+    pool.close()
+    return staffInfo
 }
 
 //
@@ -15,32 +42,29 @@ const config = {
 //
 
 let POST = (req, checked) => {
-     
-    
-    sql.on("error", err => {
-        console.log(err)
-    })
-
-    sql.connect(config, () => {
-        checked.forEach(member => {
-            let name = member.name
+    const postCheckIn = async () => {
+        let index = await getStaffInfo(req.body.senderEmail)
+        let pool = new sql.ConnectionPool(config.datawarehouse)
+        let postPool = await pool.connect()
+        for (let i = 0; i < checked.length; i++) {
+            let member = checked[i].name
             let patt = /.'/g
-            if (patt.test(name)) {
-                name = name.replace(patt, "''")
-            }
-            let request = new sql.Request()
-            request.query(`DECLARE @staffIndex int
-                        SET @staffIndex = (SELECT StaffIndex FROM [dbo].[tblStaff] WHERE StaffEMail = '${req.body.senderEmail}')
-                        INSERT INTO [dbo].[MandM](EventDate, EventPerson, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy, EventRating)
-                        VALUES (CURRENT_TIMESTAMP, '${name}', 'M+M', 'RELATE', 'HR-LEADER', 'Checked in with Homeroom Member', @staffIndex, '${req.body.senderEmail}', ${member.rating});`, 
-                        (err, recordset) => {
-                            if (err) {
-                                console.log(err)
-                                console.log(req.body)
-                            }
-                        })
+            member = replace(patt, "''")
+            await postPool.request()
+                .input('memeberName', sql.NVarChar, member)
+                .input('leaderEmail', sql.NVarChar, req.body.senderEmail)
+                .input('leaderIndex', sql.NVarChar, index.StaffIndex)
+                .input('memberRating', sql.Int, checked[i].rating)
+                .query(`INSERT INTO [dbo].[MandM](EventDate, EventPerson, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy, EventRating)
+                VALUES (CURRENT_TIMESTAMP, @memberName, 'M+M', 'RELATE', 'HR-LEADER', 'Checked in with Homeroom Member', @leaderIndex, '@leaderEmail, @memberRating);`)
+        }
+        pool.close()
+        return true
+    }
+    postCheckIn()
+        .catch(err => {
+            console.log(`Homeroom Check-in postCheckIn Error:\n${err}`)
         })
-    })
 }
 
 //
@@ -48,55 +72,27 @@ let POST = (req, checked) => {
 //
 
 let MPOST = (req) => {
-     
-    sql.connect(config, () => {
-        let request = new sql.Request()
-        request.query(`DECLARE @staffIndex int
-            SET @staffIndex = (SELECT StaffIndex FROM dbo.tblStaff WHERE StaffEMail = '${req.body.senderEmail}')
-            DECLARE @hrnum int
-            SET @hrnum = (SELECT StaffAttribute FROM dbo.tblStaff WHERE StaffEMail = '${req.body.senderEmail}')
-            DECLARE @leader nvarchar(255)
-            SET @leader= (SELECT StaffName FROM dbo.tblStaff WHERE StaffIndex = (SELECT StaffIndex FROM dbo.MandMLeaders WHERE Category = @hrnum))
-            INSERT INTO dbo.MandM(EventDate, EventPerson, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
-            VALUES (CURRENT_TIMESTAMP, @leader, 'M+M', 'RELATE', 'HR-STAFF', 'Homeroom Leader Check In', @staffIndex, '${req.body.senderEmail}')`, 
-            (err, recordset) => {
-                if (err) {
-                    console.log(err)
-                    console.log(req.body)
-                }
-            })
-    })
-}
-
-//
-// Testing Homeroom members logging check-ins with 'no' conditional option
-//
-
-let TMEMPOST = (req) => {
-     
-    if (req.body.memberChecked === 1) {
-        sql.connect(config, () => {
-            let request = new sql.Request()
-            request.query(`DECLARE @staffIndex int
-                SET @staffIndex = (SELECT StaffIndex FROM dbo.tblStaff WHERE StaffEMail = '${req.body.senderEmail}')
-                DECLARE @hrnum int
-                SET @hrnum = (SELECT StaffAttribute FROM dbo.tblStaff WHERE StaffEMail = '${req.body.senderEmail}')
-                DECLARE @leader nvarchar(255)
-                SET @leader= (SELECT StaffName FROM dbo.tblStaff WHERE StaffIndex = (SELECT StaffIndex FROM dbo.MandMLeaders WHERE Category = @hrnum))
-                INSERT INTO dbo.MandM(EventDate, EventPerson, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
-                VALUES (CURRENT_TIMESTAMP, @leader, 'M+M', 'RELATE', 'HR-STAFF', 'Homeroom Leader Check In', @staffIndex, '${req.body.senderEmail}')`, 
-                (err, recordset) => {
-                    if (err) {
-                        console.log(err)
-                        console.log(req.body)
-                    }
-                })
-        })
+    const postMemberCheckIn = async () => {
+        let staffInfo = await getStaffInfo(req.body.senderEmail)
+        let pool = new sql.ConnectionPool(config.datawarehouse)
+        let checkInPool = await pool.connect()
+        await checkInPool.request()
+            .input('leaderName', sql.NVarChar, staffInfo.CatName)
+            .input('senderEmail', sql.NVarChar, req.body.senderEmail)
+            .input('senderIndex', sql.Int, staffInfo.StaffIndex)
+            .query(`INSERT INTO dbo.MandM(EventDate, EventPerson, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
+            VALUES (CURRENT_TIMESTAMP, @leaderName, 'M+M', 'RELATE', 'HR-STAFF', 'Homeroom Leader Check In', @senderIndex, @senderEmail)`)
+        pool.close()
+        return true
     }
+
+    postMemberCheckIn()
+        .catch(err => {
+            console.log(`Member Check-in postMemberCheckIn Error:\n${err}`)
+        })
 }
 
 module.exports = {
     POST: POST,
-    MPOST: MPOST,
-    TMEMPOST: TMEMPOST
+    MPOST: MPOST
 }
