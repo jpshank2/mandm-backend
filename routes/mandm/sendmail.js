@@ -2,12 +2,25 @@ const nodemailer = require('nodemailer')
 const sql = require('mssql')
 
 const config = {
-    user: process.env.DV_DB_USER,
-    password: process.env.DV_DB_PASS,
-    server: process.env.DV_DB_SERVER,
-    database: process.env.DV_DB_DB,
-    options: {
-        encrypt: true
+    datawarehouse: {
+        user: process.env.DV_DB_USER,
+        password: process.env.DV_DB_PASS,
+        server: process.env.DV_DB_SERVER,
+        database: process.env.DV_DB_DB,
+        options: {
+            encrypt: true,
+            enableArithAbort: true
+        }
+    },
+    engine: {
+        user: process.env.DB_USER,
+        password: process.env.DB_PASS,
+        server: process.env.DB_SERVER,
+        database: process.env.DB_DB,
+        options: {
+            encrypt: true,
+            enableArithAbort: true
+        }
     }
 }
 
@@ -174,19 +187,30 @@ const REQUEST = info => {
         project = project.replace(patt, "'")
     }
 
-    sql.connect(config, () => {
-        let request = new sql.Request()
-        request.query(`SELECT StaffEMail FROM dbo.tblStaff WHERE StaffName = '${info.name}'`, (err, recordset) => {
-            if (err) {console.log(err)}
+    const getStaffEmail = async () => {
+        let pool = new sql.ConnectionPool(config.engine)
+        let emailPool = await pool.connect()
+        let data = await emailPool.request()
+            .input('requestedName', sql.NVarChar, info.name)
+            .query(`SELECT StaffEMail FROM dbo.tblStaff WHERE StaffName = @requestedName AND StaffEnded IS NULL`)
+        let email = data.recordset[0].StaffEMail
+        pool.close()
+        return email
+    }
+
+    getStaffEmail()
+        .then(resultEmail => {
             transporter.sendMail({
                 from: process.env.EM_USER,
-                to: recordset.recordsets[0][0].StaffEMail,
+                to: resultEmail,
                 cc: info.senderEmail,
                 subject: `${info.senderName} is Requesting a ROLO from ${name}`,
                 html: `<p>${name},</p><p>${info.senderName} is requesting a ROLO for the ${project} project</p><p>Thanks in advance for submitting a ROLO!</p>`
             })
         })
-    })
+        .catch(err => {
+            console.log(`M+M Send Request Email Error:\n${err}`)
+        })
 }
 
 module.exports = {

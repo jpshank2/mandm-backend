@@ -195,9 +195,9 @@ router.post("/mandm/request", (req, res) => {
 //     MandMOther.POST(req, res)
 // })
 
-router.get("/kudos/:cornerstone", (req, res) => {
-    RandomKUDOS.BASE(req, res)
-})
+// router.get("/kudos/:cornerstone", (req, res) => {
+//     RandomKUDOS.BASE(req, res)
+// })
 
 router.get("/kudos", (req, res) => {
     res.sendFile(__dirname + "/views/kudos.html")
