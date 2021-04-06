@@ -6,8 +6,7 @@ const history = require('connect-history-api-fallback')
 //const NextPage  = require("./datadash/nextpage.js")
 const EPredict  = require("./employeepredict/employeepredict.js")
 const HomeRoom  = require("./homeroom/homeroom.js")
-const OfficeCheckOut = require('./checkout/test-checkout.js')
-const TestSiteOfficeCheckOut = require('./checkout/checkout.js')
+const OfficeCheckOut = require('./checkout/checkout.js')
 const OfficeSendMail = require('./checkout/sendmail.js')
 const OfficeCancel = require('./checkout/cancel.js')
 const MandM = require("./mandm/dashboard.js")
@@ -129,27 +128,14 @@ router.post("/homeroom/", (req, res) => {
 // })
 
 router.get("/test-checkout/:site", (req, res) => {
-    TestSiteOfficeCheckOut.BASE(req, res)
-})
-
-router.get("/test-checkout/:site/:id", (req, res) => {
-    TestSiteOfficeCheckOut.SPECIFIC(req, res)
-})
-
-router.post("/test-checkout/:site/:id", (req, res) => {
-    TestSiteOfficeCheckOut.CHECKOUT(req, res)
-    OfficeSendMail.EMAIL(req.body)
-})
-
-router.get("/offices", (req, res) => {
     OfficeCheckOut.BASE(req, res)
 })
 
-router.get("/offices/:id", (req, res) => {
+router.get("/test-checkout/:site/:id", (req, res) => {
     OfficeCheckOut.SPECIFIC(req, res)
 })
 
-router.post("/offices/:id", (req, res) => {
+router.post("/test-checkout/:site/:id", (req, res) => {
     OfficeCheckOut.CHECKOUT(req, res)
     OfficeSendMail.EMAIL(req.body)
 })
@@ -168,15 +154,15 @@ router.get("/offices/available/:site/:id", (req, res) => {
 })
 
 router.get("/offices/standup/:site", (req, res) => {
-    TestSiteOfficeCheckOut.GETSTANDUP(req, res)
+    OfficeCheckOut.GETSTANDUP(req, res)
 })
 
 router.get("/offices/nonstandup/:site", (req, res) => {
-    TestSiteOfficeCheckOut.GETNONSTANDUP(req, res)
+    OfficeCheckOut.GETNONSTANDUP(req, res)
 })
 
 router.get("/staff/:id", (req, res) => {
-    TestSiteOfficeCheckOut.STAFF(req, res)
+    OfficeCheckOut.STAFF(req, res)
 })
 
 router.get("/", (req, res) => {
