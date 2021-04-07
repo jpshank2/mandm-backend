@@ -58,7 +58,7 @@ const BASE = (req, res) => {
 const KUDOS = (req, res) => {
     if (req.body.description.length > 0) {
         Update.KUDOS(req.body)
-        //SendMail.EMAIL(req.body)
+        SendMail.EMAIL(req.body)
         res.send(("Thanks for sending a KUDOS!"))
     }
 }
@@ -76,7 +76,7 @@ const DOWNWARD = (req, res) => {
     console.log(req.body)
     if (req.body.retain.length > 0 || req.body.lose.length > 0) {
         Update.DOWNWARD(req.body)
-        //SendMail.DOWNWARD(req.body)
+        SendMail.DOWNWARD(req.body)
         res.send("Thanks for sending a ROLO!")
     }
 }
