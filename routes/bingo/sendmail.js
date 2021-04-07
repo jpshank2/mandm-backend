@@ -97,7 +97,7 @@ let EMAIL = number => {
                 .query(`SELECT DISTINCT BC.BingoUser
                 FROM [dbo].[Bingo] B
                 INNER JOIN dbo.BingoCards BC ON BC.BingoCard = B.BingoCard
-                WHERE B.BingoCard NOT IN (SELECT BingoCard FROM dbo.Bingo WHERE BingoNumber = 15) AND BC.BingoUser IS NOT NULL`)
+                WHERE B.BingoCard NOT IN (SELECT BingoCard FROM dbo.Bingo WHERE BingoNumber = @number) AND BC.BingoUser IS NOT NULL`)
             staff = data.recordset
             pool.close()
             return staff
