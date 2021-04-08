@@ -28,7 +28,7 @@ const BASE = (req, res) => {
         let missedUsers = []
         let pool = await sql.connect(config.datawarehouse)
         let data = await pool.request()
-            .query(`SELECT BC.BingoUser, SUM(B.BingoMissed) AS Missed
+            .query(`SELECT BC.BingoUser, SUM(B.BingoMissed) AS BingoMissed
             FROM dbo.Bingo B
             INNER JOIN dbo.BingoCards BC ON BC.BingoCard = B.BingoCard
             WHERE CONVERT(DATE, BingoDate) = CONVERT(DATE, GETDATE()) AND BingoNumber = 0
@@ -55,6 +55,7 @@ const BASE = (req, res) => {
             }
             getStaff(result, results)
                 .then(missedUsers => {
+                    console.log(missedUsers)
                     res.send(missedUsers)
                 })
         })
