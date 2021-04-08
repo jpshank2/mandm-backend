@@ -49,14 +49,14 @@ let POST = (req, checked) => {
         for (let i = 0; i < checked.length; i++) {
             let member = checked[i].name
             let patt = /.'/g
-            member = replace(patt, "''")
+            member = member.replace(patt, "''")
             await postPool.request()
                 .input('memeberName', sql.NVarChar, member)
                 .input('leaderEmail', sql.NVarChar, req.body.senderEmail)
                 .input('leaderIndex', sql.NVarChar, index.StaffIndex)
                 .input('memberRating', sql.Int, checked[i].rating)
                 .query(`INSERT INTO [dbo].[MandM](EventDate, EventPerson, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy, EventRating)
-                VALUES (CURRENT_TIMESTAMP, @memberName, 'M+M', 'RELATE', 'HR-LEADER', 'Checked in with Homeroom Member', @leaderIndex, '@leaderEmail, @memberRating);`)
+                VALUES (CURRENT_TIMESTAMP, @memberName, 'M+M', 'RELATE', 'HR-LEADER', 'Checked in with Homeroom Member', @leaderIndex, @leaderEmail, @memberRating);`)
         }
         pool.close()
         return true

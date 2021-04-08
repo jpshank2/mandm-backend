@@ -31,7 +31,7 @@ const BASE = (req, res) => {
             .query(`SELECT BC.BingoUser
             FROM dbo.Bingo B
             INNER JOIN dbo.BingoCards BC ON BC.BingoCard = B.BingoCard
-            WHERE CONVERT(DATE, BingoDate) = CONVERT(DATE, '2021-03-25') AND BingoNumber = 0`)
+            WHERE CONVERT(DATE, BingoDate) = CONVERT(DATE, GETDATE()) AND BingoNumber = 0`)
         
         data.recordset.forEach(user => {
             missedUsers.push(user.BingoUser)

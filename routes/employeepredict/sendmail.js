@@ -61,6 +61,9 @@ let UPWARD = (info) => {
 
     getHomeroomLeader(info)
         .then(result => {
+            console.log('getHomeroomLeader result log:')
+            let keyValues = Object.entries(info)
+            console.log(keyValues)
             transporter.sendMail({
                 from: process.env.EM_USER,
                 to: "zealhr@bmss.com",

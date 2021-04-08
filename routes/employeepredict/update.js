@@ -174,7 +174,7 @@ const DOWNWARD = info => {
             dataWarehouseConnection.connect()
                 .then(pool => {
                     const sqlQuery = `INSERT INTO [dbo].[MandM](EventDate, EventPerson, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
-                    VALUES (CURRENT_TIMESTAMP, @recipient, 'M+M', 'FEEDBACK', 'UPWARD', CONCAT(@project, '; Rating - ', @rating, '; Retain - ', @retain '; Lose - ', @lose), @staffIndex, @senderEmail);`
+                    VALUES (CURRENT_TIMESTAMP, @recipient, 'M+M', 'FEEDBACK', 'UPWARD', CONCAT(@project, '; Rating - ', @rating, '; Retain - ', @retain, '; Lose - ', @lose), @staffIndex, @senderEmail);`
 
                     return new sql.Request(pool)
                         .input('recipient', sql.NVarChar, name)
