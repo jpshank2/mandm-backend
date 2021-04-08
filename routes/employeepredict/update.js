@@ -130,12 +130,12 @@ const UPWARD = info => {
                     return dataWarehouseConnection.close()
                 })
                 .catch(err => {
-                    console.log(`Upward ROLO error:\n${err}\n${info}`)
+                    console.log(`Upward ROLO Inner Error:\n${err}\n${info}`)
                 })
 
         })
         .catch(err => {
-            console.log(`Upward ROLO error:\n${err}\n${info}`)
+            console.log(`Upward ROLO Outer Error:\n${err}\n${info}`)
         })
 }
 
@@ -190,11 +190,11 @@ const DOWNWARD = info => {
                     return dataWarehouseConnection.close()
                 })
                 .catch(err => {
-                    console.log(`Downward ROLO error:\n${err}\n${info}`)
+                    console.log(`Downward ROLO Inner Error:\n${err}\n${info}`)
                 })
         })
         .catch(err => {
-            console.log(`Downward ROLO error:\n${err}\n${info}`)
+            console.log(`Downward ROLO Outer Error:\n${err}\n${info}`)
         })
 }
 
