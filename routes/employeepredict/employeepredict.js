@@ -64,7 +64,6 @@ const KUDOS = (req, res) => {
 }
 
 const UPWARD = (req, res) => {
-    console.log(req.body)
     if (req.body.retain.length > 0 || req.body.lose.length > 0) {
         Update.UPWARD(req.body)
         SendMail.UPWARD(req.body)
@@ -73,7 +72,6 @@ const UPWARD = (req, res) => {
 }
 
 const DOWNWARD = (req, res) => {
-    console.log(req.body)
     if (req.body.retain.length > 0 || req.body.lose.length > 0) {
         Update.DOWNWARD(req.body)
         SendMail.DOWNWARD(req.body)

@@ -51,7 +51,7 @@ const BASE = (req, res) => {
             FROM dbo.MandM
             WHERE EventPerson = @staff AND EventAction = 'HR-LEADER'
             ORDER BY EventDate DESC`)
-        let lastDate = data.recordset[0].EventDate ? data.recordset[0].EventDate : '2020-01-01T16:37:42.320Z'
+        let lastDate = data.recordset.length > 0 ? data.recordset[0].EventDate : '2020-01-01T16:37:42.320Z'
         pool.close()
         return lastDate
     }

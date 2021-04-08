@@ -51,7 +51,7 @@ let POST = (req, checked) => {
             let patt = /.'/g
             member = member.replace(patt, "''")
             await postPool.request()
-                .input('memeberName', sql.NVarChar, member)
+                .input('memberName', sql.NVarChar, member)
                 .input('leaderEmail', sql.NVarChar, req.body.senderEmail)
                 .input('leaderIndex', sql.NVarChar, index.StaffIndex)
                 .input('memberRating', sql.Int, checked[i].rating)

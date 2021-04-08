@@ -55,7 +55,6 @@ const BASE = (req, res) => {
             }
             getStaff(result, results)
                 .then(missedUsers => {
-                    console.log(missedUsers)
                     res.send(missedUsers)
                 })
         })

@@ -15,7 +15,7 @@ const POST = (req, res) => {
         let pool = await sql.connect(devConfig)
         for (let i = 0; i < req.body.override.length; i++) {
             if (i === req.body.override.lastIndexOf(req.body.override[i])) {
-                let data = pool.request()
+                let data = await pool.request()
                     .input('staff', sql.Int, req.body.override[i])
                     .query(`DECLARE @card int
                     SET @card = (SELECT BingoCard FROM dbo.BingoCards WHERE BingoUser = @staff)
