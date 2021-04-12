@@ -140,8 +140,9 @@ const THISOFFICE = (req, res) => {
                     ,OfficeCode
                     ,Number
                     FROM dbo.OpenOffices
-                    WHERE Name = @deskName AND 
-                    (CheckedIn > DATEADD(DAY, @positiveDateChange, GETDATE()) OR CheckedOut > DATEADD(DAY, @negativeDateChange, GETDATE())) AND Site = @officeSite;`)
+                    WHERE Name = @deskName 
+                    AND GETDATE() BETWEEN DATEADD(DAY, @negativeDateChange, CheckedOut) AND DATEADD(DAY, @positiveDateChange, CheckedIn) 
+                    AND Site = @officeSite;`)
             dateChange++
             appointments = data.recordset
         }

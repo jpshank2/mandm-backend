@@ -70,12 +70,12 @@ const KUDOS = (info) => {
                     return dataWarehouseConnection.close()
                 })
                 .catch(err => {
-                    console.log(`KUDOS error:\n${err}\n${info}`)
+                    console.log(`KUDOS Inner Error:\n${err}\n${info}`)
                 })
 
         })
         .catch(err => {
-            console.log(`KUDOS error:\n${err}\n${info}`)
+            console.log(`KUDOS Outer Error:\n${err}\n${info}`)
         })
 }
 
