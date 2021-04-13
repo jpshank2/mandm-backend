@@ -80,20 +80,19 @@ const KUDOS = (info) => {
 }
 
 const UPWARD = info => {
-    let { project, name, senderEmail, retain, lose, rating } = info
     let patt = /.'/g
 
-    if (patt.test(retain)) {
-        retain = retain.replace(patt, "''")
+    if (patt.test(info.retain)) {
+        info.retain = info.retain.replace(patt, "''")
     }
-    if (patt.test(lose)) {
-        lose = lose.replace(patt, "''")
+    if (patt.test(info.lose)) {
+        info.lose = info.lose.replace(patt, "''")
     }
-    if (patt.test(project)) {
-        project = project.replace(patt, "''")
+    if (patt.test(info.project)) {
+        info.project = info.project.replace(patt, "''")
     }
-    if (patt.test(name)) {
-        name = name.replace(patt, "''")
+    if (patt.test(info.name)) {
+        info.name = info.name.replace(patt, "''")
     }
 
     const postUpward = async (info) => {
@@ -117,13 +116,13 @@ const UPWARD = info => {
                     VALUES (CURRENT_TIMESTAMP, @recipient, 'M+M', 'FEEDBACK', 'UPWARD', CONCAT(@project, CONCAT('; Rating - ', CONCAT(@rating, CONCAT('; Retain - ', CONCAT(@retain, CONCAT('; Lose - ', @lose)))))), @staffIndex, @senderEmail);`
 
                     return new sql.Request(pool)
-                        .input('recipient', sql.NVarChar, name)
-                        .input('rating', sql.NVarChar, rating)
-                        .input('project', sql.NVarChar, project)
-                        .input('retain', sql.NVarChar, retain)
-                        .input('lose', sql.NVarChar, lose)
+                        .input('recipient', sql.NVarChar, info.name)
+                        .input('rating', sql.NVarChar, info.rating)
+                        .input('project', sql.NVarChar, info.project)
+                        .input('retain', sql.NVarChar, info.retain)
+                        .input('lose', sql.NVarChar, info.lose)
                         .input('staffIndex', sql.Int, result)
-                        .input('senderEmail', sql.NVarChar, senderEmail)
+                        .input('senderEmail', sql.NVarChar, info.senderEmail)
                         .query(sqlQuery)
                 })
                 .then(() => {
@@ -140,20 +139,19 @@ const UPWARD = info => {
 }
 
 const DOWNWARD = info => {
-    let { project, name, senderEmail, retain, lose, rating } = info
     let patt = /.'/g
 
-    if (patt.test(retain)) {
-        retain = retain.replace(patt, "''")
+    if (patt.test(info.retain)) {
+        info.retain = info.retain.replace(patt, "''")
     }
     if (patt.test(lose)) {
-        lose = lose.replace(patt, "''")
+        info.lose = info.lose.replace(patt, "''")
     }
-    if (patt.test(project)) {
-        project = project.replace(patt, "''")
+    if (patt.test(info.project)) {
+        info.project = info.project.replace(patt, "''")
     }
-    if (patt.test(name)) {
-        name = name.replace(patt, "''")
+    if (patt.test(info.name)) {
+        info.name = info.name.replace(patt, "''")
     }
 
     const postDownward = async (info) => {
@@ -177,13 +175,13 @@ const DOWNWARD = info => {
                     VALUES (CURRENT_TIMESTAMP, @recipient, 'M+M', 'FEEDBACK', 'UPWARD', CONCAT(@project, '; Rating - ', @rating, '; Retain - ', @retain, '; Lose - ', @lose), @staffIndex, @senderEmail);`
 
                     return new sql.Request(pool)
-                        .input('recipient', sql.NVarChar, name)
-                        .input('rating', sql.NVarChar, rating)
-                        .input('project', sql.NVarChar, project)
-                        .input('retain', sql.NVarChar, retain)
-                        .input('lose', sql.NVarChar, lose)
+                        .input('recipient', sql.NVarChar, info.name)
+                        .input('rating', sql.NVarChar, info.rating)
+                        .input('project', sql.NVarChar, info.project)
+                        .input('retain', sql.NVarChar, info.retain)
+                        .input('lose', sql.NVarChar, info.lose)
                         .input('staffIndex', sql.Int, result)
-                        .input('senderEmail', sql.NVarChar, senderEmail)
+                        .input('senderEmail', sql.NVarChar, info.senderEmail)
                         .query(sqlQuery)
                 })
                 .then(() => {

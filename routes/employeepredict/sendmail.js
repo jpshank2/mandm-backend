@@ -42,7 +42,6 @@ let EMAIL = (info) => {
 let UPWARD = (info) => {   
     const getHomeroomLeader = async (info) => {
         let recipientEmail = info.userEmail
-        let homeroomLeader = 'dmurphy@bmss.com'
         let pool = await sql.connect(config)
         let sqlQuery = `SELECT StaffEMail
                 FROM dbo.tblStaff
@@ -54,7 +53,8 @@ let UPWARD = (info) => {
         let data = await pool.request()
             .input('recipientEmail', sql.NVarChar, recipientEmail)
             .query(sqlQuery)
-        homeroomLeader = data.recordset[0].StaffEMail
+        let homeroomLeader 
+        data.recordset.length > 0 ? data.recordset[0].StaffEMail : 'dmurphy@bmss.com'
         pool.close()
         return homeroomLeader
     }
@@ -78,7 +78,6 @@ let UPWARD = (info) => {
 let DOWNWARD = (info) => {
     const getHomeroomLeader = async (info) => {
         let recipientEmail = info.userEmail
-        let homeroomLeader = 'dmurphy@bmss.com'
         let pool = await sql.connect(config)
         let sqlQuery = `SELECT StaffEMail
                 FROM dbo.tblStaff
@@ -90,14 +89,15 @@ let DOWNWARD = (info) => {
         let data = await pool.request()
             .input('recipientEmail', sql.NVarChar, recipientEmail)
             .query(sqlQuery)
-        homeroomLeader = data.recordset[0].StaffEMail
+        let homeroomLeader
+        data.recordset.length > 0 ? data.recordset[0].StaffEMail : 1
         pool.close()
         return homeroomLeader
     }
 
     getHomeroomLeader(info)
         .then(result => {
-            if (result) {
+            if (result !== 1) {
                 transporter.sendMail({
                     from: process.env.EM_USER,
                     to: "zealhr@bmss.com",
