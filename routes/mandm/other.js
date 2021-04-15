@@ -15,7 +15,7 @@ const POST = (req, res) => {
      
     sql.connect(config, () => {
         let request = new sql.Request()
-        let patt = /.'/g
+        let patt = /'/g
         if (patt.test(req.body.notes)) {
             req.body.notes = req.body.notes.replace(patt, "''")
         }

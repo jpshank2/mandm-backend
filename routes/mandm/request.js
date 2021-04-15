@@ -40,7 +40,7 @@ const getStaffInfo = async (email) => {
 
 const REQUEST = (req, res) => {
     const requestROLO = async (req) => {
-        let patt = /.'/g
+        let patt = /'/g
         let name = req.body.name
         if (patt.test(name)) {
             name = name.replace(patt, "''")

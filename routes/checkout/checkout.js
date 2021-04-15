@@ -178,7 +178,7 @@ const THISOFFICE = (req, res) => {
 
 const CHECKOUT = (req, res) => {
     let {email, name, location, site, standUp, checkedOut, checkedIn, image, number} = req.body
-    let patt = /.'/g
+    let patt = /'/g
     if (patt.test(location)) {
         location = location.replace(patt, "''")
     }

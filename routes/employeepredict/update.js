@@ -25,7 +25,7 @@ const config = {
 
 const KUDOS = (info) => {
     let { project, description, name, senderEmail, cornerstone } = info
-    let patt = /.'/g
+    let patt = /'/g
 
     if (patt.test(description)) {
         description = description.replace(patt, "''")
@@ -80,7 +80,7 @@ const KUDOS = (info) => {
 }
 
 const UPWARD = info => {
-    let patt = /.'/g
+    let patt = /'/g
 
     if (patt.test(info.retain)) {
         info.retain = info.retain.replace(patt, "''")
@@ -139,7 +139,7 @@ const UPWARD = info => {
 }
 
 const DOWNWARD = info => {
-    let patt = /.'/g
+    let patt = /'/g
 
     if (patt.test(info.retain)) {
         info.retain = info.retain.replace(patt, "''")

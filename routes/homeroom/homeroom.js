@@ -60,7 +60,7 @@ const BASE = (req, res) => {
         let finalList = []
         for (let i = 0; i < list.length; i++) {
             let staffName = list[i].StaffName
-            let patt = /.'/g
+            let patt = /'/g
             staffName = staffName.replace(patt, "''")
             let date = await callback(staffName)
             finalList.push({...list[i], LastDate: date})

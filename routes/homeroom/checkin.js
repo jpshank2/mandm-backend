@@ -48,7 +48,7 @@ let POST = (req, checked) => {
         let postPool = await pool.connect()
         for (let i = 0; i < checked.length; i++) {
             let member = checked[i].name
-            let patt = /.'/g
+            let patt = /'/g
             member = member.replace(patt, "''")
             await postPool.request()
                 .input('memberName', sql.NVarChar, member)

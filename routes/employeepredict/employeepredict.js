@@ -31,7 +31,7 @@ const config = {
 const BASE = (req, res) => {
     
     let name = req.params.name
-    let patt = /.'/g
+    let patt = /'/g
     if (patt.test(name)) {
         name = name.replace(patt, "''")
     }
