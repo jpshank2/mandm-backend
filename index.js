@@ -16,6 +16,4 @@ app.use(express.urlencoded({
 
 app.use(queryRouter);
 
-app.listen(PORT, () => {
-    console.log(`Running on ${PORT}`)
-});
+app.listen(PORT);
