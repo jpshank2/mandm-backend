@@ -70,12 +70,12 @@ const KUDOS = (info) => {
                     return dataWarehouseConnection.close()
                 })
                 .catch(err => {
-                    console.log(`KUDOS Inner Error:\n${err}\n${info}`)
+                    console.log(`KUDOS Inner Error:\n${err}\n${JSON.stringify(info)}`)
                 })
 
         })
         .catch(err => {
-            console.log(`KUDOS Outer Error:\n${err}\n${info}`)
+            console.log(`KUDOS Outer Error:\n${err}\n${JSON.stringify(info)}`)
         })
 }
 
@@ -129,12 +129,12 @@ const UPWARD = info => {
                     return dataWarehouseConnection.close()
                 })
                 .catch(err => {
-                    console.log(`Upward ROLO Inner Error:\n${err}\n${info}`)
+                    console.log(`Upward ROLO Inner Error:\n${err}\n${JSON.stringify(info)}`)
                 })
 
         })
         .catch(err => {
-            console.log(`Upward ROLO Outer Error:\n${err}\n${info}`)
+            console.log(`Upward ROLO Outer Error:\n${err}\n${JSON.stringify(info)}`)
         })
 }
 
@@ -188,11 +188,11 @@ const DOWNWARD = info => {
                     return dataWarehouseConnection.close()
                 })
                 .catch(err => {
-                    console.log(`Downward ROLO Inner Error:\n${err}\n${info}`)
+                    console.log(`Downward ROLO Inner Error:\n${err}\n${JSON.stringify(info)}`)
                 })
         })
         .catch(err => {
-            console.log(`Downward ROLO Outer Error:\n${err}\n${info}`)
+            console.log(`Downward ROLO Outer Error:\n${err}\n${JSON.stringify(info)}`)
         })
 }
 

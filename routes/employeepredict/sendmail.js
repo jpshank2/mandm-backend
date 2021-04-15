@@ -35,7 +35,7 @@ let EMAIL = (info) => {
     pooledTransporter.sendMail({
         from: process.env.EM_USER,
         to: info.userEmail,
-        bcc: `hgeary@bmss.com; ${info.senderEmail}`,
+        bcc: `zealhr@bmss.com; ${info.senderEmail}`,
         //["bshealy@bmss.com", "hrussell@bmss.com", info.senderEmail],
         subject: `Cornerstone KUDOS for ${info.name}`,
         html: `<h1 style="text-align: center">Cornerstone KUDOS</h1><br><p><strong>Employee Name: </strong>${info.name}</p><p><strong>Project: </strong>${info.project}</p><p><strong>What Cornerstone was exhibited? </strong>${info.cornerstone}</p><p><strong>Submitted by: </strong>${info.senderName}</p><p><strong>Today's Date: </strong>${d}</p><br><br><p style="text-align: center">${info.description}</p>`
@@ -74,7 +74,7 @@ let UPWARD = (info) => {
             })
         })
         .catch(err => {
-            console.log(`Upward ROLO Email Error:\n${err}\n${info}`)
+            console.log(`Upward ROLO Email Error:\n${err}\n${JSON.stringify(info)}`)
         })
 }
 
@@ -121,7 +121,7 @@ let DOWNWARD = (info) => {
             }
         })
         .catch(err => {
-            console.log(`Downard ROLO Email Error:\n${err}\n${info}`)
+            console.log(`Downard ROLO Email Error:\n${err}\n${JSON.stringify(info)}`)
         })
 }
 
