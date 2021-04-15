@@ -15,7 +15,8 @@ const config = {
     }
 }
 
-let transporter = nodemailer.createTransport({
+let pooledTransporter = nodemailer.createTransport({
+    pool: true,
     host: "smtp.office365.com",
     port: 587,
     secure: false,
@@ -25,11 +26,13 @@ let transporter = nodemailer.createTransport({
     },
     tls: {
         rejectUnauthorized: false
-    }
+    },
+    maxMessages: 3,
+    maxConnections: 3
 })
 
 let EMAIL = (info) => {
-    transporter.sendMail({
+    pooledTransporter.sendMail({
         from: process.env.EM_USER,
         to: info.userEmail,
         bcc: `hgeary@bmss.com; ${info.senderEmail}`,
@@ -61,7 +64,7 @@ let UPWARD = (info) => {
 
     getHomeroomLeader(info)
         .then(result => {
-            transporter.sendMail({
+            pooledTransporter.sendMail({
                 from: process.env.EM_USER,
                 to: "zealhr@bmss.com",
                 cc: result,
@@ -98,7 +101,7 @@ let DOWNWARD = (info) => {
     getHomeroomLeader(info)
         .then(result => {
             if (result !== 1) {
-                transporter.sendMail({
+                pooledTransporter.sendMail({
                     from: process.env.EM_USER,
                     to: "zealhr@bmss.com",
                     cc: `${result}; ${info.userEmail}`,
@@ -107,7 +110,7 @@ let DOWNWARD = (info) => {
                     html: `<h1 style="text-align: center">ROLO - Downward</h1><br><p><strong>Employee Name: </strong>${info.name}</p><p><strong>Project: </strong>${info.project}</p><p><strong>How did ${info.name} do on the project? </strong>${info.rating}</p><p><strong>Submitted by: </strong>${info.senderName}</p><p><strong>Today's Date: </strong>${d}</p><br><br><h2 style="text-align: center">Retain</h2><p>${info.retain}</p><br><h2 style="text-align: center">Lose</h2><p>${info.lose}</p>`
                 })
             } else {
-                transporter.sendMail({
+                pooledTransporter.sendMail({
                     from: process.env.EM_USER,
                     to: "zealhr@bmss.com",
                     cc: `${info.userEmail}`,

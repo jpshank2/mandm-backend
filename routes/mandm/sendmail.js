@@ -24,7 +24,8 @@ const config = {
     }
 }
 
-let transporter = nodemailer.createTransport({
+let pooledTransporter = nodemailer.createTransport({
+    pool: true,
     host: "smtp.office365.com",
     port: 587,
     secure: false,
@@ -34,7 +35,9 @@ let transporter = nodemailer.createTransport({
     },
     tls: {
         rejectUnauthorized: false
-    }
+    },
+    maxMessages: 3,
+    maxConnections: 3
 })
 
 const RECRUIT = (info) => {
@@ -44,7 +47,7 @@ const RECRUIT = (info) => {
     }
     switch(info.option) {
         case 0:
-            transporter.sendMail({
+            pooledTransporter.sendMail({
                 from: process.env.EM_USER,
                 to: "hgeary@bmss.com",
                 //cc: "bshealy@bmss.com",
@@ -54,7 +57,7 @@ const RECRUIT = (info) => {
             })
             break;
         case 8:
-            transporter.sendMail({
+            pooledTransporter.sendMail({
                 from: process.env.EM_USER,
                 to: "hgeary@bmss.com",
                 //cc: "bshealy@bmss.com",
@@ -64,7 +67,7 @@ const RECRUIT = (info) => {
             })
             break;
         case 9:
-            transporter.sendMail({
+            pooledTransporter.sendMail({
                 from: process.env.EM_USER,
                 to: "hgeary@bmss.com",
                 //cc: "bshealy@bmss.com",
@@ -82,7 +85,7 @@ const FEEDBACK = info => {
     if (patt.test(info.notes)) {
         info.notes = info.notes.replace(patt, "'")
     }
-    transporter.sendMail({
+    pooledTransporter.sendMail({
         from: process.env.EM_USER,
         to: "hgeary@bmss.com",
         //cc: "bshealy@bmss.com",
@@ -102,7 +105,7 @@ const RELATE = info => {
     }
     switch(info.option) {
         case 2:
-            transporter.sendMail({
+            pooledTransporter.sendMail({
                 from: process.env.EM_USER,
                 to: "hgeary@bmss.com",
                 //cc: "bshealy@bmss.com",
@@ -112,7 +115,7 @@ const RELATE = info => {
             })
             break;
         case 3:
-            transporter.sendMail({
+            pooledTransporter.sendMail({
                 from: process.env.EM_USER,
                 to: "hgeary@bmss.com",
                 //cc: "bshealy@bmss.com",
@@ -122,7 +125,7 @@ const RELATE = info => {
             })
             break;
         case 4:
-            transporter.sendMail({
+            pooledTransporter.sendMail({
                 from: process.env.EM_USER,
                 to: "hgeary@bmss.com",
                 //cc: "bshealy@bmss.com",
@@ -132,7 +135,7 @@ const RELATE = info => {
             })
             break;
         case 5:
-            transporter.sendMail({
+            pooledTransporter.sendMail({
                 from: process.env.EM_USER,
                 to: "hgeary@bmss.com",
                 //cc: "bshealy@bmss.com",
@@ -151,7 +154,7 @@ const EDUCATE = info => {
     }
     switch(info.option) {
         case 6:
-            transporter.sendMail({
+            pooledTransporter.sendMail({
                 from: process.env.EM_USER,
                 to: "hgeary@bmss.com",
                 //cc: "bshealy@bmss.com",
@@ -161,7 +164,7 @@ const EDUCATE = info => {
             })
             break;
         case 7:
-            transporter.sendMail({
+            pooledTransporter.sendMail({
                 from: process.env.EM_USER,
                 to: "hgeary@bmss.com",
                 //cc: "bshealy@bmss.com",
@@ -200,7 +203,7 @@ const REQUEST = info => {
 
     getStaffEmail()
         .then(resultEmail => {
-            transporter.sendMail({
+            pooledTransporter.sendMail({
                 from: process.env.EM_USER,
                 to: resultEmail,
                 cc: info.senderEmail,

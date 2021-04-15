@@ -1,7 +1,8 @@
 const nodemailer = require('nodemailer');
 const ical       = require('ical-generator');
 
-let transporter = nodemailer.createTransport({
+let pooledTransporter = nodemailer.createTransport({
+    pool: true,
     host: "smtp.office365.com",
     port: 587,
     secure: false,
@@ -11,7 +12,9 @@ let transporter = nodemailer.createTransport({
     },
     tls: {
         rejectUnauthorized: false
-    }
+    },
+    maxMessages: 3,
+    maxConnections: 3
 })
 
 let EMAIL = (info) => {
@@ -30,7 +33,7 @@ let EMAIL = (info) => {
         ]
     }).toString();
 
-    transporter.sendMail({
+    pooledTransporter.sendMail({
         from: process.env.EM_USER,
         to: info.email,
         subject: `${info.name} Check Out Information`,

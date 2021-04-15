@@ -144,7 +144,7 @@ const DOWNWARD = info => {
     if (patt.test(info.retain)) {
         info.retain = info.retain.replace(patt, "''")
     }
-    if (patt.test(lose)) {
+    if (patt.test(info.lose)) {
         info.lose = info.lose.replace(patt, "''")
     }
     if (patt.test(info.project)) {

@@ -1,6 +1,7 @@
 const nodemailer = require('nodemailer')
 
-let transporter = nodemailer.createTransport({
+let pooledTransporter = nodemailer.createTransport({
+    pool: true,
     host: "smtp.office365.com",
     port: 587,
     secure: false,
@@ -10,7 +11,9 @@ let transporter = nodemailer.createTransport({
     },
     tls: {
         rejectUnauthorized: false
-    }
+    },
+    maxMessages: 3,
+    maxConnections: 3
 })
 
 let EMAIL = (info, checked) => {
@@ -20,7 +23,7 @@ let EMAIL = (info, checked) => {
     checked.forEach(name => {
         list += `<li>${name}</li>`
     });
-    transporter.sendMail({
+    pooledTransporter.sendMail({
         from: process.env.EM_USER,
         to: "hrussell@bmss.com",
         cc: "bshealy@bmss.com",
@@ -31,7 +34,7 @@ let EMAIL = (info, checked) => {
 }
 
 let MEMEMAIL = (email) => {
-    transporter.sendMail({
+    pooledTransporter.sendMail({
         from: process.env.EM_USER,
         to: email,
         subject: `Homeroom Leader Check in`,
