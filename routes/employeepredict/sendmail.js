@@ -55,8 +55,7 @@ let UPWARD = (info) => {
         let data = await pool.request()
             .input('recipientEmail', sql.NVarChar, recipientEmail)
             .query(sqlQuery)
-        let homeroomLeader 
-        data.recordset.length > 0 ? data.recordset[0].StaffEMail : 'dmurphy@bmss.com'
+        let homeroomLeader = data.recordset.length > 0 ? data.recordset[0].StaffEMail : 'dmurphy@bmss.com'
         pool.close()
         return homeroomLeader
     }
@@ -99,10 +98,33 @@ let DOWNWARD = (info) => {
     getHomeroomLeader(info)
         .then(result => {
             if (result !== 1) {
+                let carbonCopy = result
+                switch (carbonCopy) {
+                    case 'blorimer@bmss.com':
+                        carbonCopy += '; acaldwell@bmss.com'
+                        break;
+                    case 'kfluker@bmss.com':
+                        carbonCopy += '; dbrock@bmss.com'
+                        break;
+                    case 'bbrown@bmss.com':
+                        carbonCopy += '; dbrock@bmss.com'
+                        break;
+                    case 'munderhill@bmss.com':
+                        carbonCopy += '; tzablan@bmss.com'
+                        break;
+                    case 'jcarroll@bmss.com':
+                        carbonCopy += '; astapler@bmss.com'
+                        break;
+                    case 'mbrand@bmss.com':
+                        carbonCopy += '; rbowers@bmss.com'
+                        break;
+                    default:
+                        carbonCopy = carbonCopy
+                }
                 pooledTransporter.sendMail({
                     from: process.env.EM_USER,
                     to: "zealhr@bmss.com",
-                    cc: `${result}; ${info.userEmail}`,
+                    cc: `${carbonCopy}; ${info.userEmail}`,
                     bcc: info.senderEmail,
                     subject: `ROLO - Downward for ${info.name}`,
                     html: `<h1 style="text-align: center">ROLO - Downward</h1><br><p><strong>Employee Name: </strong>${info.name}</p><p><strong>Project: </strong>${info.project}</p><p><strong>How did ${info.name} do on the project? </strong>${info.rating}</p><p><strong>Submitted by: </strong>${info.senderName}</p><p><strong>Today's Date: </strong>${d}</p><br><br><h2 style="text-align: center">Retain</h2><p>${info.retain}</p><br><h2 style="text-align: center">Lose</h2><p>${info.lose}</p>`
