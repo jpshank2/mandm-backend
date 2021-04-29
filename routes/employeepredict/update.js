@@ -134,7 +134,8 @@ const UPWARD = info => {
 
         })
         .catch(err => {
-            console.log(`Upward ROLO Outer Error:\n${err}\n${JSON.stringify(info)}`)
+            console.log(`Upward ROLO Outer Error:\n${err}\nTried following code:\nINSERT INTO [dbo].[MandM](EventDate, EventPerson, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
+            VALUES (CURRENT_TIMESTAMP, ${info.name}, 'M+M', 'FEEDBACK', 'UPWARD', CONCAT(${info.project}, CONCAT('; Rating - ', CONCAT(${info.rating}, CONCAT('; Retain - ', CONCAT(${info.retain}, CONCAT('; Lose - ', ${info.lose})))))), @staffIndex, @senderEmail);`)
         })
 }
 
@@ -172,7 +173,7 @@ const DOWNWARD = info => {
             dataWarehouseConnection.connect()
                 .then(pool => {
                     const sqlQuery = `INSERT INTO [dbo].[MandM](EventDate, EventPerson, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
-                    VALUES (CURRENT_TIMESTAMP, @recipient, 'M+M', 'FEEDBACK', 'UPWARD', CONCAT(@project, '; Rating - ', @rating, '; Retain - ', @retain, '; Lose - ', @lose), @staffIndex, @senderEmail);`
+                    VALUES (CURRENT_TIMESTAMP, @recipient, 'M+M', 'FEEDBACK', 'DOWNWARD', CONCAT(@project, '; Rating - ', @rating, '; Retain - ', @retain, '; Lose - ', @lose), @staffIndex, @senderEmail);`
 
                     return new sql.Request(pool)
                         .input('recipient', sql.NVarChar, info.name)
@@ -192,7 +193,8 @@ const DOWNWARD = info => {
                 })
         })
         .catch(err => {
-            console.log(`Downward ROLO Outer Error:\n${err}\n${JSON.stringify(info)}`)
+            console.log(`Downward ROLO Outer Error:\n${err}\nTried following code:\nINSERT INTO [dbo].[MandM](EventDate, EventPerson, EventType, EventClass, EventAction, EventNotes, EventStaff, EventUpdatedBy)
+            VALUES (CURRENT_TIMESTAMP, ${info.name}, 'M+M', 'FEEDBACK', 'DOWNWARD', CONCAT(${info.project}, CONCAT('; Rating - ', CONCAT(${info.rating}, CONCAT('; Retain - ', CONCAT(${info.retain}, CONCAT('; Lose - ', ${info.lose})))))), @staffIndex, @senderEmail);`)
         })
 }
 
