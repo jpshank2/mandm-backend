@@ -36,7 +36,7 @@ const BASE = (req, res) => {
             FROM dbo.tblCategory H
             INNER JOIN tblStaffEx SE ON SE.StaffSubDepartment = H.Category AND H.CatType = 'SUBDEPT'
             INNER JOIN tblStaff S ON S.StaffIndex = SE.StaffIndex
-            WHERE H.CatName = (SELECT StaffName FROM dbo.tblStaff WHERE StaffEMail = CONCAT(@staff, '@bmss.com')) AND S.StaffType <> 4`)
+            WHERE H.CatName = (SELECT StaffName FROM dbo.tblStaff WHERE StaffEMail = CONCAT(@staff, '@bmss.com')) AND S.StaffType <> 4 AND StaffEnded IS NULL`)
         let staff = data.recordset
         pool.close()
         return staff
