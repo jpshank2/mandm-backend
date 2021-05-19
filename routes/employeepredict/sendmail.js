@@ -62,6 +62,20 @@ let UPWARD = (info) => {
 
     getHomeroomLeader(info)
         .then(result => {
+            let patt = /''/g
+            if (patt.test(info.retain)) {
+                info.retain = info.retain.replace(patt, "'")
+            }
+            if (patt.test(info.lose)) {
+                info.lose = info.lose.replace(patt, "'")
+            }
+            if (patt.test(info.project)) {
+                info.project = info.project.replace(patt, "'")
+            }
+            if (patt.test(info.name)) {
+                info.name = info.name.replace(patt, "'")
+            }
+
             pooledTransporter.sendMail({
                 from: process.env.EM_USER,
                 to: "zealhr@bmss.com",
@@ -121,6 +135,21 @@ let DOWNWARD = (info) => {
                     default:
                         carbonCopy = carbonCopy
                 }
+                
+                let patt = /''/g
+                if (patt.test(info.retain)) {
+                    info.retain = info.retain.replace(patt, "'")
+                }
+                if (patt.test(info.lose)) {
+                    info.lose = info.lose.replace(patt, "'")
+                }
+                if (patt.test(info.project)) {
+                    info.project = info.project.replace(patt, "'")
+                }
+                if (patt.test(info.name)) {
+                    info.name = info.name.replace(patt, "'")
+                }
+
                 pooledTransporter.sendMail({
                     from: process.env.EM_USER,
                     to: "zealhr@bmss.com",
@@ -133,7 +162,7 @@ let DOWNWARD = (info) => {
                 pooledTransporter.sendMail({
                     from: process.env.EM_USER,
                     to: "zealhr@bmss.com",
-                    cc: `${info.userEmail}`,
+                    cc: info.userEmail,
                     bcc: info.senderEmail,
                     subject: `ROLO - Downward for ${info.name}`,
                     html: `<h1 style="text-align: center">ROLO - Downward</h1><br><p><strong>Employee Name: </strong>${info.name}</p><p><strong>Project: </strong>${info.project}</p><p><strong>How did ${info.name} do on the project? </strong>${info.rating}</p><p><strong>Submitted by: </strong>${info.senderName}</p><p><strong>Today's Date: </strong>${d}</p><br><br><h2 style="text-align: center">Retain</h2><p>${info.retain}</p><br><h2 style="text-align: center">Lose</h2><p>${info.lose}</p>`
