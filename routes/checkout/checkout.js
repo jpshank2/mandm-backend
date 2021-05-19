@@ -139,7 +139,28 @@ const THISOFFICE = (req, res) => {
                     WHERE Name = @deskName 
                     AND (CheckedOut > GETDATE() OR CAST(CheckedIn AS date) = CAST(GETDATE() AS DATE)) 
                     AND Site = @officeSite;`)
-        appointments = data.recordset
+        if(data.recordset.length > 0) {
+            appointments = data.recordset
+        } else {
+            data = await officePool.request()
+                .input('officeSite', sql.NVarChar, req.params.site)
+                .input('deskName', sql.NVarChar, id)
+                .query(`SELECT TOP 1 ID
+                    ,Name
+                    ,EmployeeID
+                    ,StandUp
+                    ,Site
+                    ,Location
+                    ,CONVERT(datetime, [CheckedIn], 120) AS CheckedIn
+                    ,CONVERT(DATETIME, [CheckedOut], 120) AS CheckedOut
+                    ,ImagePath
+                    ,OfficeCode
+                    ,Number
+                    FROM dbo.OpenOffices
+                    WHERE Name = @deskName 
+                    AND Site = @officeSite;`)
+            appointments = data.recordset
+        }
         pool.close()
         return appointments
     }

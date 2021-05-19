@@ -67,7 +67,7 @@ const CANCEL = (req, res) => {
             ,[EmployeeID]
             ,[OfficeCode]
             FROM [DataWarehouse].[dbo].[OpenOffices] O
-            WHERE ID = @officeID`)
+            WHERE ID = @checkoutID`)
         let officeInfo = data.recordset[0]
         pool.close()
         return officeInfo
