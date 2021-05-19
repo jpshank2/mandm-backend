@@ -121,13 +121,9 @@ const THISOFFICE = (req, res) => {
         let pool = new sql.ConnectionPool(config.datawarehouse)
         let officePool = await pool.connect()
         let appointments = []
-        let dateChange = 0
-        while (appointments.length === 0) {
-            let data = await officePool.request()
+        let data = await officePool.request()
                 .input('officeSite', sql.NVarChar, req.params.site)
                 .input('deskName', sql.NVarChar, id)
-                .input('positiveDateChange', sql.Int, dateChange)
-                .input('negativeDateChange', sql.Int, -dateChange)
                 .query(`SELECT ID
                     ,Name
                     ,EmployeeID
@@ -141,11 +137,9 @@ const THISOFFICE = (req, res) => {
                     ,Number
                     FROM dbo.OpenOffices
                     WHERE Name = @deskName 
-                    AND GETDATE() BETWEEN DATEADD(DAY, @negativeDateChange, CheckedOut) AND DATEADD(DAY, @positiveDateChange, CheckedIn) 
+                    AND (CheckedOut > GETDATE() OR CAST(CheckedIn AS date) = CAST(GETDATE() AS DATE)) 
                     AND Site = @officeSite;`)
-            dateChange++
-            appointments = data.recordset
-        }
+        appointments = data.recordset
         pool.close()
         return appointments
     }
