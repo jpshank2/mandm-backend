@@ -18,9 +18,13 @@ const BASE = (req, res) => {
         let index = 0
         let pool = await sql.connect(config)
         let data = await pool.request()
-            .query(`SELECT DISTINCT BingoNumber FROM dbo.Bingo WHERE BingoCalled = 0`)
+            .query(`SELECT DISTINCT BingoNumber 
+            FROM dbo.Bingo B
+            INNER JOIN dbo.BingoCards BC ON BC.BingoCard = B.BingoCard
+            WHERE BingoCalled = 0 AND BingoCompany = 'BMSS'`)
         index = Math.floor(Math.random() * data.recordset.length)
-        
+        console.log(index)
+
         let number = data.recordset[index]
         pool.close()
         return number
@@ -41,7 +45,10 @@ const DATES = (req, res) => {
 
         let pool = await sql.connect(config)
         let data = await pool.request()
-            .query(`SELECT DISTINCT BingoDate, BingoNumber FROM dbo.Bingo WHERE BingoCalled = 1 AND BingoNumber != 0`)
+            .query(`SELECT DISTINCT BingoDate, BingoNumber 
+            FROM dbo.Bingo B
+            INNER JOIN dbo.BingoCards BC ON BC.BingoCard = B.BingoCard
+            WHERE BingoCalled = 1 AND BingoNumber != 0 AND BingoCompany = 'BMSS'`)
         called = data.recordset
         pool.close()
         return called
@@ -61,7 +68,7 @@ const POST = (req, res) => {
         let pool = await sql.connect(config)
         let data = await pool.request()
             .input('number', sql.Int, req.body.number)
-            .query(`UPDATE dbo.Bingo SET BingoCalled = 1, BingoDate = CONVERT(DATE, CURRENT_TIMESTAMP) WHERE BingoNumber = @number`)
+            .query(`UPDATE dbo.Bingo SET BingoCalled = 1, BingoDate = CONVERT(DATE, CURRENT_TIMESTAMP) WHERE BingoNumber = @number AND BingoCard IN (SELECT BingoCard FROM dbo.BingoCards WHERE BingoCompany = 'BMSS')`)
         console.log(data)
         pool.close()
         return 1
@@ -80,8 +87,8 @@ const RESET = (req, res) => {
     const resetGame = async () => {
         let pool = await sql.connect(config)
         let data = await pool.request()
-            .query(`UPDATE dbo.Bingo SET BingoCalled = 0, BingoDate = NULL, BingoMissed = 0 WHERE BingoNumber != 0
-                    UPDATE dbo.Bingo SET BingoMissed = 0, BingoDate = NULL WHERE BingoNumber = 0`)
+            .query(`UPDATE dbo.Bingo SET BingoCalled = 0, BingoDate = NULL, BingoMissed = 0 WHERE BingoNumber != 0 AND BingoCard IN (SELECT BingoCard FROM dbo.BingoCards WHERE BingoCompany = 'BMSS')
+                    UPDATE dbo.Bingo SET BingoMissed = 0, BingoDate = NULL WHERE BingoNumber = 0 AND BingoCard IN (SELECT BingoCard FROM dbo.BingoCards WHERE BingoCompany = 'BMSS')`)
         console.log(data)
         pool.close()
         return 1

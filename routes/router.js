@@ -20,6 +20,13 @@ const OverridePost = require("./bingo/overridePost.js")
 const Support = require("./support/sendmail.js");
 const OfficeAvailability = require("./checkout/available.js")
 const CheckClient = require("./clients/check-client.js")
+const MandMTest = require('./mandm/testing/request.js')
+const MandMTestROLO = require('./mandm/testing/rolos.js')
+const MandMTestKUDOS = require('./mandm/testing/kudos.js')
+const MandMTestHOMEROOM = require('./mandm/testing/homeroom.js')
+const MandMTestMENTOR = require('./mandm/testing/mentor.js')
+const MandMTestDASHBOARD = require('./mandm/testing/dashboard.js')
+const PE = require('./mandm/testing/peapis.js')
 
 app.use(history({
     rewrites:[
@@ -27,6 +34,56 @@ app.use(history({
         {from: /\/.*/, to:'/'}
     ]
 }))
+
+router.post('/testing', (req, res) => {
+    MandMTest.BASE(req, res)
+})
+
+router.post('/testing/getrequests', (req, res) => {
+    MandMTest.GET(req, res)
+})
+
+router.post('/testing/employees', (req, res) => {
+    PE.getEmployee(req, res)
+})
+
+router.post('/testing/rolo', (req, res) => {
+    MandMTestROLO.ROLO(req, res)
+})
+
+router.post('/testing/delete', (req, res) => {
+    MandMTestROLO.DELETE(req, res)
+})
+
+router.post('/testing/getoutstanding', (req, res) => {
+    MandMTest.OUTSTANDING(req, res)
+})
+
+router.post('/testing/kudos', (req, res) => {
+    MandMTestKUDOS.KUDOS(req, res)
+})
+
+router.post('/testing/homeroom', (req, res) => {
+    MandMTestHOMEROOM.getHomeroomMembers(req, res)
+})
+
+router.post('/testing/homeroom/check', (req, res) => {
+    if (req.body.checked.length >= 1) {
+        MandMTestHOMEROOM.memberCheckIn(req, res)
+    }
+
+    if (req.body.memberChecked === 1) {
+        MandMTestHOMEROOM.getHomeroomLeaders(req, res)
+    }
+})
+
+router.post('/testing/mentor', (req, res) => {
+    MandMTestMENTOR.mentorMeeting(req, res)
+})
+
+router.post('/testing/dashboard', (req, res) => {
+    MandMTestDASHBOARD.dashboard(req, res)
+})
 
 // router.get("/", (req, res) => {
 //     res.send("nice")

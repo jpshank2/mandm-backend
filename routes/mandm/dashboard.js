@@ -1,6 +1,5 @@
 const sql = require("mssql");
 
-
 const config = {
     datawarehouse: {
         user: process.env.DV_DB_USER,

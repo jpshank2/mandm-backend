@@ -31,7 +31,7 @@ const BASE = (req, res) => {
             .query(`SELECT BC.BingoUser, SUM(B.BingoMissed) AS BingoMissed
             FROM dbo.Bingo B
             INNER JOIN dbo.BingoCards BC ON BC.BingoCard = B.BingoCard
-            WHERE CONVERT(DATE, BingoDate) = CONVERT(DATE, GETDATE()) AND BingoNumber = 0
+            WHERE CONVERT(DATE, BingoDate) = CONVERT(DATE, GETDATE()) AND BingoNumber = 0 AND BC.BingoCompany = 'BMSS'
             GROUP BY BC.BingoUser`)
         
         missedUsers = data.recordset
@@ -48,6 +48,7 @@ const BASE = (req, res) => {
                     let data = await pool.request()
                         .input('staff', sql.Int, staff[i].BingoUser)
                         .query('SELECT StaffIndex, StaffName FROM dbo.tblStaff WHERE StaffIndex = @staff')
+                    console.log(data)
                     returnArr.push({StaffIndex: data.recordset[0].StaffIndex, StaffName: data.recordset[0].StaffName, BingoMissed: staff[i].BingoMissed})
                 }
                 pool.close()
