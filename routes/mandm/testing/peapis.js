@@ -219,7 +219,7 @@ const GET_MY_HOMEROOM = (myName, token) => {
                 }
     
                 let members = await axios(memberConfig)
-                //console.log(members.data.Results)
+                // console.log(members.data.Results)
                 if (members.data.Results.find(member => {return member.StaffName === myName})) {
                     return leaderCode.CatName
                 } else {
@@ -232,8 +232,11 @@ const GET_MY_HOMEROOM = (myName, token) => {
 
         const homerooms = await getAllHomerooms()
 
-        while (!myHomeroom || i < (homerooms.length - 1)) {
+        while (!myHomeroom) {
             myHomeroom = await findMyHomeroom(homerooms[i], token)
+            if (myHomeroom) {
+                return myHomeroom
+            }
             i++
         }
 
