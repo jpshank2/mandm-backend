@@ -223,7 +223,7 @@ const GET_MY_HOMEROOM = (myName, token) => {
                 if (members.data.Results.find(member => {return member.StaffName === myName})) {
                     return leaderCode.CatName
                 } else {
-                    return
+                    return undefined
                 }
             } else {
                 return 'Unknown'

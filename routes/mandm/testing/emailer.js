@@ -136,7 +136,7 @@ const ROLOS = async (rolosData) => {
                 to: "zealhr@bmss.com",
                 cc: `${hrLeaderInfo.StaffEMail}; ${rolosData.recipient.StaffEMail}`,
                 bcc: rolosData.sender.StaffEMail,
-                subject: `ROLO - Upward for ${rolosData.recipient.StaffName}`,
+                subject: `ROLO - Downward for ${rolosData.recipient.StaffName}`,
                 html: `<h1 style="text-align: center">ROLO - Downward</h1><br><p><strong>Employee Name: </strong>${rolosData.recipient.StaffName}</p><p><strong>Project: </strong>${rolosData.project}</p><p><strong>How did ${rolosData.recipient.StaffName} do on the project? </strong>${ratingString}</p><p><strong>Submitted by: </strong>${rolosData.sender.StaffName}</p><p><strong>Today's Date: </strong>${d}</p><br><br><h2 style="text-align: center">Retain</h2><p>${rolosData.retain}</p><br><h2 style="text-align: center">Lose</h2><p>${rolosData.lose}</p>`
             })
         }
