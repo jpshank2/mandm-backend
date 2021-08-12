@@ -54,7 +54,7 @@ const HOMEROOM_LEADER = async (leaderCheckinData) => {
         for (let i = 0; i < leaderCheckinData.checkedMembers.length; i++) {
             let MembersStaff = await PE.getMyIndex(leaderCheckinData.checkedMembers[i].staff, token)
             let ratingString = ''
-            switch (leaderCheckinData.checkedMembers[i].rating) {
+            switch (parseInt(leaderCheckinData.checkedMembers[i].rating)) {
                 case 5:
                     ratingString = 'Best week ever'
                     break;
