@@ -125,18 +125,16 @@ const THISOFFICE = (req, res) => {
             data = await officePool.request()
                 .input('officeSite', sql.NVarChar, req.params.site)
                 .input('deskID', sql.NVarChar, req.params.id)
-                .query(`SELECT TOP 1 R.ReservationIndex,
+                .query(`SELECT TOP 1 1 AS [ReservationIndex],
                 O.OfficeName,
-                R.ReservationEmployee,
+                0 AS [ReservationEmployee],
                 O.OfficeStandUp,
                 O.OfficeSite,
                 O.OfficeLocation,
-                R.ReservationCheckOut,
-                R.ReservationCheckIn,
-                O.OfficeImage,
-                R.ReservationCode
-            FROM Office.Reservations R
-                INNER JOIN Office.Offices O ON O.OfficeIndex = R.ReservationOffice
+                '2020-05-18 14:00:00.000' AS [ReservationCheckOut],
+                '2020-05-18 17:00:00.000' AS [ReservationCheckIn],
+                O.OfficeImage
+            FROM Office.Offices O
             WHERE O.OfficeIndex = @deskID
             AND O.OfficeSite = UPPER(@officeSite);`)
             appointments = data.recordset
