@@ -21,9 +21,8 @@ const REQUEST = async (requestData) => {
     try {
         pooledTransporter.sendMail({
             from: process.env.EM_USER,
-            to: 'jeremyshank@bmss.com',
-            // to: requestData.recipient.StaffEMail,
-            // cc: requestData.sender.StaffEMail,
+            to: requestData.recipient.StaffEMail,
+            cc: requestData.sender.StaffEMail,
             subject: `${requestData.sender.StaffName} is Requesting a ROLO for ${requestData.project}`,
             html: `<p>${requestData.recipient.StaffName}</p><p>${requestData.sender.StaffName} is requesting a ROLO for ${requestData.project}. Please use the M+M Outlook plugin to give them feedback. Thanks in advance for filling out this ROLO!</p>`
         })
