@@ -91,7 +91,7 @@ const KUDOS = async (kudosData) => {
 
         pooledTransporter.sendMail({
             from: process.env.EM_USER,
-            to: kudosData.recipeint.StaffEMail,
+            to: kudosData.recipient.StaffEMail,
             bcc: `zealhr@bmss.com; ${kudosData.sender.StaffEMail}`,
             subject: `Cornerstone KUDOS for ${kudosData.recipient.StaffName}`,
             html: `<h1 style="text-align: center">Cornerstone KUDOS</h1><br><p><strong>Employee Name: </strong>${kudosData.recipient.StaffName}</p><p><strong>What Cornerstone was exhibited? </strong>${kudosData.cornerstone}</p><p><strong>Submitted by: </strong>${kudosData.sender.StaffName}</p><p><strong>Today's Date: </strong>${d}</p><br><br><p style="text-align: center">${kudosData.description}</p>`
