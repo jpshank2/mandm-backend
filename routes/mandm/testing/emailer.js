@@ -109,15 +109,13 @@ const ROLOS = async (rolosData) => {
         let d = new Date()
         d = d.toString().substring(4, 15)
         let ratingString = ""
-        switch (rolosData.rating) {
-            case 3:
-                ratingString = 'Thumbs Up'
-                break;
-            case 1:
-                ratingString = 'Thumbs Down'
-                break;
-            default:
-                ratingString = 'Okay'
+
+        if (rolosData.rating == 3) {
+            ratingString = 'Thumbs Up'
+        } else if (rolosData.rating == 1) {
+            ratingString = 'Thumbs Down'
+        } else {
+            ratingString = 'Okay'
         }
 
         if (rolosData.direction === 1) {

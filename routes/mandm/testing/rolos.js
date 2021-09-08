@@ -29,10 +29,6 @@ const SEND_ROLO = (req, res) => {
     const sendROLO = async (rolo) => {
         let token = await PE.getToken()
         let {direction, recipientName, recipientEmail, recipientIndex, project, requestIndex, retain, lose, rating, senderName, senderEmail} = rolo.body
-        let patt = /'/g
-        let sqlProject = project.replace(patt, "''")
-        let sqlRetain = retain.replace(patt, "''")
-        let sqlLose = lose.replace(patt, "''")
         let recipient = await PE.getMyIndex(recipientName, token)
         if (recipientIndex === 0) {
             recipientIndex = recipient.StaffIndex
@@ -58,10 +54,6 @@ const SEND_ROLO = (req, res) => {
     const sendRequested = async (rolo) => {
         let token = await PE.getToken()
         let {direction, recipientName, recipientEmail, recipientIndex, project, requestIndex, retain, lose, rating, senderName, senderEmail} = rolo.body
-        let patt = /'/g
-        let sqlProject = project.replace(patt, "''")
-        let sqlRetain = retain.replace(patt, "''")
-        let sqlLose = lose.replace(patt, "''")
         let recipient = await PE.getMyIndex(recipientName, token)
         if (recipientIndex === 0) {
             recipientIndex = recipient.StaffIndex
