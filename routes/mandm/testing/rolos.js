@@ -1,6 +1,7 @@
-const sql   = require("mssql");
-const PE    = require("./peapis.js")
-const Email = require("./emailer.js")
+const sql    = require("mssql");
+const PE     = require("./peapis.js")
+const Email  = require("./emailer.js")
+const moment = require("moment")
 
 const config = {
     datawarehouse: {
@@ -87,6 +88,8 @@ const SEND_ROLO = (req, res) => {
                 res.send('Thanks for sending a ROLO!')
             })
             .catch(err => {
+                console.log(`sendROLO error - ${moment().format('LLL')}\n`)
+                console.log(req.body)
                 console.log(err)
             })
     } else {
@@ -96,6 +99,8 @@ const SEND_ROLO = (req, res) => {
                 res.send('Thanks for sending a ROLO!')
             })
             .catch(err => {
+                console.log(`sendRequested error - ${moment().format('LLL')}\n`)
+                console.log(req.body)
                 console.log(err)
             })
     }
@@ -125,6 +130,8 @@ const DELETE_ROLO = (req, res) => {
             res.send('Thanks for deleting that un-needed ROLO!')
         })
         .catch(err => {
+            console.log(`deleteROLO error - ${moment().format('LLL')}\n`)
+            console.log(req.body)
             console.log(err)
         })
 }

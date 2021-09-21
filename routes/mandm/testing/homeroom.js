@@ -71,14 +71,17 @@ const GET_HOMEROOM_MEMBERS = (req, res) => {
                                 res.send([...result, ...genTrack])
                             })
                             .catch(err => {
+                                console.log(`Daniel Brock HR error - ${moment().format('LLL')}\n`)
                                 console.log(err)
                             })
                     })
                     .catch(err =>{
+                        console.log(`Brad Brown HR error - ${moment().format('LLL')}\n`)
                         console.log(err)
                     })
             })
             .catch(err => {
+                console.log(`Kate Fluker HR error - ${moment().format('LLL')}\n`)
                 console.log(err)
             })
     } else {
@@ -87,6 +90,7 @@ const GET_HOMEROOM_MEMBERS = (req, res) => {
                 res.send(result)
             })
             .catch(err => {
+                console.log(`${leader} HR error - ${moment().format('LLL')}\n`)
                 console.log(err)
             })
     }
@@ -121,6 +125,7 @@ const GET_HOMEROOM_LEADERS = (req, res) => {
             }
         })
         .catch(err => {
+            console.log(`HR Leader error for ${req.body.senderName} - ${moment().format('LLL')}\n`)
             console.log(err)
         })
 }
@@ -149,6 +154,8 @@ const HOMEROOM_CHECKIN = (req, res) => {
             Email.leader(result)
         })
         .catch(err => {
+            console.log(`HR Leader Checkin error - ${moment().format('LLL')}\n`)
+            console.log(req.body)
             console.log(err)
         })
 }

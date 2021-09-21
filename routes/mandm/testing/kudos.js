@@ -1,6 +1,7 @@
 const sql   = require("mssql");
 const PE    = require("./peapis.js")
 const Email = require("./emailer.js")
+const moment = require('moment')
 
 const config = {
     datawarehouse: {
@@ -57,6 +58,8 @@ const SEND_KUDOS = (req, res) => {
             res.send('Thanks for sending a KUDOS!')
         })
         .catch(err => {
+            console.log(`Kudos error - ${moment().format('LLL')}`)
+            console.log(req.body)
             console.log(err)
         })
 }

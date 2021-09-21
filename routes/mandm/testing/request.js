@@ -1,6 +1,7 @@
 const sql   = require("mssql");
 const PE    = require("./peapis.js")
 const Email = require("./emailer.js")
+const moment = require('moment')
 
 const config = {
     datawarehouse: {
@@ -57,6 +58,8 @@ const SEND_REQUEST = (req, res) => {
             res.send("Thanks for sending in a ROLO request!")
         })
         .catch(err => {
+            console.log(`Send Request error - ${moment().format('LLL')}`)
+            console.log(req.body)
             res.send(err)
         })
 }
@@ -103,6 +106,7 @@ const GET_MY_REQUESTS = (req, res) => {
                 })
         })
         .catch(err => {
+            console.log(`Get Requests error for ${req.body.myName} - ${moment().format('LLL')}`)
             res.send(err)
         })
 }
@@ -145,6 +149,7 @@ const GET_OUTSTANDING = (req, res) => {
                 })
         })
         .catch(err => {
+            console.log(`Get Outstanding Requests for ${req.body.myName} - ${moment().format('LLL')}`)
             console.log(err)
         })
 }

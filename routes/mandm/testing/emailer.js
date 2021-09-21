@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer')
 const PE = require('./peapis.js')
+const moment = require("moment")
 
 let pooledTransporter = nodemailer.createTransport({
     pool: true,
@@ -27,6 +28,8 @@ const REQUEST = async (requestData) => {
             html: `<p>${requestData.recipient.StaffName}</p><p>${requestData.sender.StaffName} is requesting a ROLO for ${requestData.project}. Please use the M+M Outlook plugin to give them feedback. Thanks in advance for filling out this ROLO!</p>`
         })
     } catch (err) {
+        console.log(`Request email error - ${moment().format('LLL')}\n`)
+        console.log(requestData)
         console.log(err)
     }
 }
@@ -40,6 +43,8 @@ const HOMEROOM_MEMBER = async (memberCheckinData) => {
             html: `<p>Thanks for letting us know you and your Homeroom Leader checked in together!</p>`
         })
     } catch (err) {
+        console.log(`HR Member email error - ${moment().format('LLL')}\n`)
+        console.log(memberCheckinData)
         console.log(err)
     }
 }
@@ -80,6 +85,8 @@ const HOMEROOM_LEADER = async (leaderCheckinData) => {
             html: `<h1 style="text-align: center">${d} Homeroom Check In</h1><br><h3>${leaderCheckinData.leader.StaffName} checked in with:</h3><ul>${list}</ul>`
         })
     } catch (err) {
+        console.log(`HR Leader email error - ${moment().format('LLL')}\n`)
+        console.log(leaderCheckinData)
         console.log(err)
     }
 }
@@ -97,6 +104,8 @@ const KUDOS = async (kudosData) => {
             html: `<h1 style="text-align: center">Cornerstone KUDOS</h1><br><p><strong>Employee Name: </strong>${kudosData.recipient.StaffName}</p><p><strong>What Cornerstone was exhibited? </strong>${kudosData.cornerstone}</p><p><strong>Submitted by: </strong>${kudosData.sender.StaffName}</p><p><strong>Today's Date: </strong>${d}</p><br><br><p style="text-align: center">${kudosData.description}</p>`
         })
     } catch (err) {
+        console.log(`KUDOS email error - ${moment().format('LLL')}\n`)
+        console.log(kudosData)
         console.log(err)
     }
 }
@@ -138,6 +147,8 @@ const ROLOS = async (rolosData) => {
             })
         }
     } catch (err) {
+        console.log(`ROLOs email error - ${moment().format('LLL')}\n`)
+        console.log(rolosData)
         console.log(err)
     }
 }
@@ -152,6 +163,8 @@ const MENTOR = async (mentorData) => {
             html: `<p><strong>Employee Name: </strong>${mentorData.StaffName}</p><p>Thanks for letting us know you met with your mentor!</p>`
         })
     } catch (err) {
+        console.log(`Mentor email error - ${moment().format('LLL')}\n`)
+        console.log(mentorData)
         console.log(err)
     }
 }
