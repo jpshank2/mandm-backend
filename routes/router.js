@@ -28,12 +28,24 @@ const MandMTestMENTOR = require('./mandm/testing/mentor.js')
 const MandMTestDASHBOARD = require('./mandm/testing/dashboard.js')
 const PE = require('./mandm/testing/peapis.js')
 
-app.use(history({
-    rewrites:[
-        {from: /^\/checkout\/.*$/, to: '/'},
-        {from: /\/.*/, to:'/'}
-    ]
-}))
+// app.use(history({
+//     rewrites:[
+//         {from: /^\/checkout\/.*$/, to: '/'},
+//         {from: /\/.*/, to:'/'}
+//     ]
+// }))
+
+router.get("/bingo", (req, res) => {
+    res.sendFile(__dirname + '/views/bingo.html')
+})
+
+router.get("/", (req, res) => {
+    res.sendFile(__dirname + "/views/checkout.html")
+})
+
+router.get("/bingo/override", (req, res) => {
+    res.sendFile(__dirname + "/views/override.html")
+})
 
 router.post('/testing', (req, res) => {
     MandMTest.BASE(req, res)
@@ -155,10 +167,6 @@ router.get("/staff/:id", (req, res) => {
     OfficeCheckOut.STAFF(req, res)
 })
 
-router.get("/", (req, res) => {
-    res.sendFile(__dirname + "/views/checkout.html")
-})
-
 // router.get("/mandm/:id", (req, res) => {
 //     MandM.BASE(req, res)
 // })
@@ -195,10 +203,6 @@ router.post("/serial/splt", (req, res) => {
     Serial.LT_POST(req, res)
 })
 
-router.get("/bingo", (req, res) => {
-    res.sendFile(__dirname + '/views/bingo.html')
-})
-
 router.get("/bingo/number", (req, res) => {
     Bingo.BASE(req, res)
 })
@@ -221,10 +225,6 @@ router.get("/bingo/override/list", (req, res) => {
 
 router.post("/bingo/override/list", (req, res) => {
     OverridePost.POST(req, res)
-})
-
-router.get("/bingo/override", (req, res) => {
-    res.sendFile(__dirname + "/views/override.html")
 })
 
 router.post("/support", (req, res) => {
