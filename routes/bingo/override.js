@@ -16,6 +16,7 @@ const config = {
         password: process.env.DB_PASS,
         server: process.env.DB_SERVER,
         database: process.env.DB_DB,
+        port: 1433,
         options: {
             encrypt: true,
             enableArithAbort: true

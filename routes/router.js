@@ -26,6 +26,7 @@ const MandMTestKUDOS = require('./mandm/testing/kudos.js')
 const MandMTestHOMEROOM = require('./mandm/testing/homeroom.js')
 const MandMTestMENTOR = require('./mandm/testing/mentor.js')
 const MandMTestDASHBOARD = require('./mandm/testing/dashboard.js')
+const MandMTestGROW = require('./mandm/testing/grow.js')
 const PE = require('./mandm/testing/peapis.js')
 
 // app.use(history({
@@ -95,6 +96,10 @@ router.post('/testing/mentor', (req, res) => {
 
 router.post('/testing/dashboard', (req, res) => {
     MandMTestDASHBOARD.dashboard(req, res)
+})
+
+router.post('/testing/grow', (req, res) => {
+    MandMTestGROW.GROW(req, res)
 })
 
 // router.get("/employees/:name", (req, res) => {

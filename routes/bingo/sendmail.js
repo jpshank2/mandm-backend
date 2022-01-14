@@ -1,6 +1,7 @@
 const nodemailer = require('nodemailer')
 const sql = require("mssql");
 const moment = require("moment")
+const PE = require('./peapis.js')
 
 const config = {
     datawarehouse: {
@@ -18,6 +19,7 @@ const config = {
         password: process.env.DB_PASS,
         server: process.env.DB_SERVER,
         database: process.env.DB_DB,
+        port: 1433,
         options: {
             encrypt: true,
             enableArithAbort: true
@@ -109,16 +111,12 @@ let EMAIL = number => {
 
         const createDrawEmails = async (userArray) => {
             let messages = []
-            let pool = new sql.ConnectionPool(config.engine)
-            let drawEmailPool = await pool.connect()
             for (let i = 0; i < userArray.length; i++) {
-                let data = await drawEmailPool.request()
-                    .input('staff', sql.Int, userArray[i].BingoUser)
-                    .query(`SELECT StaffEMail FROM dbo.tblStaff WHERE StaffIndex = @staff`)
+                let data = await PE.getStaffInfo(userArray[i].BingoUser)
                 if (i === 0) {
                     messages.push({
                         from: process.env.EM_USER,
-                        to: data.recordset[0].StaffEMail,
+                        to: data.StaffUser,
                         bcc: 'kmoore@bmss.com; jeremyshank@bmss.com; lpence@bmss.com',
                         subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
                         html: `<p>You had ${letter} ${number} on your Bingo Card! Remember to enter your time for yesterday by noon today!</p>`
@@ -126,7 +124,7 @@ let EMAIL = number => {
                 } else {
                     messages.push({
                         from: process.env.EM_USER,
-                        to: data.recordset[0].StaffEMail,
+                        to: data.StaffUser,
                         subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
                         html: `<p>You had ${letter} ${number} on your Bingo Card! Remember to enter your time for yesterday by noon today!</p>`
                     })
@@ -138,15 +136,11 @@ let EMAIL = number => {
 
         const createNoDrawEmails = async (userArray) => {
             let messages = []
-            let pool = new sql.ConnectionPool(config.engine)
-            let noDrawEmailPool = await pool.connect()
             for (let i = 0; i < userArray.length; i++) {
-                let data = await noDrawEmailPool.request()
-                    .input('staff', sql.Int, userArray[i].BingoUser)
-                    .query(`SELECT StaffEMail FROM dbo.tblStaff WHERE StaffIndex = @staff`)
+                let data = await PE.getStaffInfo(userArray[i].BingoUser)
                 messages.push({
                     from: process.env.EM_USER,
-                    to: data.recordset[0].StaffEMail,
+                    to: data.StaffUser,
                     subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
                     html: `<p>You did not have ${letter} ${number} on your Bingo Card. Better luck tomorrow!</p><p>Remember to enter your time for yesterday by noon today!</p>`
                 })
@@ -189,100 +183,6 @@ let EMAIL = number => {
             .catch(err => {
                 console.log(`Bingo drawUsers Outer Error:\n${err}`)
             })
-        //     .then(result => {
-        //         console.log(result)
-        //         let drawPool = await sql.connect(config.engine)
-        //         const sqlQuery = `SELECT StaffEMail FROM dbo.tblStaff WERE StaffIndex = @staff`
-        //         let messages = []
-        //         let getEmails = await drawPool.request()
-        //                 .input('staff', sql.Int, result[0])
-        //                 .query(sqlQuery)
-        //         messages.push({
-        //             from: process.env.EM_USER,
-        //             to: getEmails.recordset[0].StaffEMail,
-        //             bcc: 'kmoore@bmss.com; jeremyshank@bmss.com; lpence@bmss.com',
-        //             subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
-        //             html: `<p>You had ${letter} ${number} on your Bingo Card! Remember to enter your time for yesterday by noon today!</p>`
-        //         })
-        //         // for (let i = 0; i < result.length; i++) {
-        //         //     let getEmails = await drawPool.request()
-        //         //         .input('staff', sql.Int, result[i])
-        //         //         .query(sqlQuery)
-        //         //     if (i === 0) {
-        //         //         messages.push({
-        //         //             from: process.env.EM_USER,
-        //         //             to: getEmails.recordset[0].StaffEMail,
-        //         //             bcc: 'kmoore@bmss.com; jeremyshank@bmss.com; lpence@bmss.com',
-        //         //             subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
-        //         //             html: `<p>You had ${letter} ${number} on your Bingo Card! Remember to enter your time for yesterday by noon today!</p>`
-        //         //         })
-        //         //     } else {
-        //         //         messages.push({
-        //         //             from: process.env.EM_USER,
-        //         //             to: getEmails.recordset[0].StaffEMail,
-        //         //             subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
-        //         //             html: `<p>You had ${letter} ${number} on your Bingo Card! Remember to enter your time for yesterday by noon today!</p>`
-        //         //         })
-        //         //     }
-        //         // }
-        //         drawPool.close()
-        //         return messages
-        //     })
-        //     .then(emails => {
-        //         emails.forEach(email => {
-        //             //pooledTransporter.sendMail(email)
-        //             console.log(email)
-        //         })
-        //     })
-        //     // .then(() => {
-        //     //     noDrawUsers()
-        //     //         .then(result => {
-        //     //             const engineConnection = new sql.ConnectionPool(config.engine)
-        //     //             engineConnection.connect()
-        //     //                 .then(noDrawPool => {
-        //     //                     const sqlQuery = `SELECT StaffEMail FROM dbo.tblStaff WERE StaffIndex = @staff`
-        //     //                     let messages = []
-        //     //                     for (let i = 0; i < result.length; i++) {
-        //     //                         let getEmails = new sql.Request(noDrawPool)
-        //     //                             .input('staff', sql.Int, result[i])
-        //     //                             .query(sqlQuery)
-        //     //                         if (i === 0) {
-        //     //                             messages.push({
-        //     //                                 from: process.env.EM_USER,
-        //     //                                 to: getEmails.recordset[0].StaffEMail,
-        //     //                                 bcc: 'kmoore@bmss.com; jeremyshank@bmss.com; lpence@bmss.com',
-        //     //                                 subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
-        //     //                                 html: `<p>You had ${letter} ${number} on your Bingo Card! Remember to enter your time for yesterday by noon today!</p>`
-        //     //                             })
-        //     //                         } else {
-        //     //                             messages.push({
-        //     //                                 from: process.env.EM_USER,
-        //     //                                 to: getEmails.recordset[0].StaffEMail,
-        //     //                                 subject: `Bingo Draw ${letter} ${number} - ${moment(Date.now()).format("MM/DD/YYYY")}`,
-        //     //                                 html: `<p>You had ${letter} ${number} on your Bingo Card! Remember to enter your time for yesterday by noon today!</p>`
-        //     //                             })
-        //     //                         }
-        //     //                     }
-        //     //                     noDrawPool.close()
-        //     //                     return messages
-        //     //                 })
-        //     //                 .then(emails => {
-        //     //                     emails.forEach(email => {
-        //     //                         //pooledTransporter.sendMail(email)
-        //     //                         console.log(email)
-        //     //                     })
-        //     //                 })
-        //     //                 .catch(err => {
-        //     //                     console.log(`Bingo noDrawUsers Inner Error:\n${err}`)
-        //     //                 })
-        //     //         })
-        //     //         .catch(err => {
-        //     //             console.log(`Bingo noDrawUsers Outer Error:\n${err}`)
-        //     //         })
-        //     // })
-        //     .catch(err => {
-        //         console.log(`Bingo drawUsers Outer Error:\n${err}`)
-        //     })
     } catch (err) {
         console.log(err)
     }

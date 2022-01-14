@@ -169,11 +169,83 @@ const MENTOR = async (mentorData) => {
     }
 }
 
+const GROW = async (growData) => {
+    try {
+        let subList = ''
+        growData.submissions.forEach(submission => {
+            switch(submission.heading) {
+                case "Resume":
+                    subList += '<li>Resume sent via email to Megan Carter/Heather Russell</li>'
+                    break
+                case "iSolve Completed":
+                    subList += '<li>Candidate referred completes iSolve link sent by MC/HR</li>'
+                    break
+                case "Buddy Lunch":
+                    subList += '<li>Buddy Lunch with new hire</li>'
+                    break
+                case "Contact Potential Candidate":
+                    subList += '<li>Contacting potential candidate about job openings &#40;must provide name to MC/HR&#41;</li>'
+                    break
+                case "Post on SM":
+                    subList += '<li>Post on LinkedIn/Facebook/etc. - hiring/recruiting specific</li>'
+                    break
+                case "Office Event":
+                    subList += '<li>Participate in ZebraFest, What the Heck is Public Accounting, or any other in office event</li>'
+                    break
+                case "Referral from Profesor":
+                    subList += '<li>Get BMSS a referral through a professor relationship</li>'
+                    break
+                case "Phone Screen":
+                    subList += '<li>MC/HR completes phone screen with your referred candidate</li>'
+                    break
+                case "Campus Event":
+                    subList += '<li>Attend on campus event</li>'
+                    break
+                case "Non Buddy Lunch":
+                    subList += '<li>Take a &#40;non-buddy&#41; new hire to coffee/lunch</li>'
+                    break
+                case "Referral Meeting":
+                    subList += '<li>Referred candidate comes in for a meeting</li>'
+                    break
+                case "Interview":
+                    subList += '<li>Participate in an interview</li>'
+                    break
+                case "Speak on Campus":
+                    subList += '<li>Speak at on campus event</li>'
+                    break
+                case "Speak in Class":
+                    subList += '<li>Get BMSS opportunity to speak in class</li>'
+                    break
+                case "Formal Buddy":
+                    subList += '<li>Formal buddy to new hire</li>'
+                    break
+                case "Present in Office":
+                    subList += '<li>Present at ZebraFest, What the Heck is Public Account, or any other in office event</li>'
+                    break
+                default:
+                    subList += '<li>Hired referred candidate</li>'
+            }
+        })
+        pooledTransporter.sendMail({
+            from: process.env.EM_USER,
+            to: growData.StaffEMail,
+            bcc: "zealhr@bmss.com",
+            subject: 'Grow the Family',
+            html: `<p><strong>Employee Name: </strong>${growData.sender.StaffName}</p><ul>${subList}</ul><p>Thanks for growing the family!</p>`
+        })
+    } catch (err) {
+        console.log(`Grow email error - ${moment().format('LLL')}\n`)
+        console.log(growData)
+        console.log(err)
+    }
+}
+
 module.exports = {
     request: REQUEST,
     member: HOMEROOM_MEMBER,
     leader: HOMEROOM_LEADER,
     kudos: KUDOS,
     rolos: ROLOS,
-    mentor: MENTOR
+    mentor: MENTOR,
+    grow: GROW
 }
