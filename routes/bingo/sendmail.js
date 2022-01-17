@@ -130,7 +130,6 @@ let EMAIL = number => {
                     })
                 }
             }
-            pool.close()
             return messages
         }
 
@@ -145,7 +144,6 @@ let EMAIL = number => {
                     html: `<p>You did not have ${letter} ${number} on your Bingo Card. Better luck tomorrow!</p><p>Remember to enter your time for yesterday by noon today!</p>`
                 })
             }
-            pool.close()
             return messages
         }
 
