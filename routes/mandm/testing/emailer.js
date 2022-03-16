@@ -127,11 +127,40 @@ const ROLOS = async (rolosData) => {
             ratingString = 'Okay'
         }
 
+        let ccString = hrLeaderInfo.StaffEMail
+
+        switch (hrLeaderInfo.StaffEMail) {
+            case "blorimer@bmss.com":
+                ccString = `${hrLeaderInfo.StaffEMail}; acaldwell@bmss.com`
+                break;
+            case "munderhill@bmss.com":
+                ccString = `${hrLeaderInfo.StaffEMail}; tzablan@bmss.com`
+                break;
+            case "jcarroll@bmss.com":
+                ccString = `${hrLeaderInfo.StaffEMail}; astapler@bmss.com`
+                break;
+            case "mbrand@bmss.com":
+                ccString = `${hrLeaderInfo.StaffEMail}; rbowers@bmss.com`
+                break;
+            case "rmendheim@bmss.com":
+                ccString = `${hrLeaderInfo.StaffEMail}; rkitchen@bmss.com`
+                break;
+            case "kfluker@bmss.com":
+                ccString = `${hrLeaderInfo.StaffEMail}; dbrock@bmss.com`
+                break;
+            case "bbrown@bmss.com":
+                ccString = `${hrLeaderInfo.StaffEMail}; dbrock@bmss.com`
+                break;
+            default:
+                leader = req.body.userName
+                break;
+        }
+
         if (rolosData.direction === 1) {
             pooledTransporter.sendMail({
                 from: process.env.EM_USER,
                 to: "zealhr@bmss.com",
-                cc: hrLeaderInfo.StaffEMail,
+                cc: ccString,
                 bcc: rolosData.sender.StaffEMail,
                 subject: `ROLO - Upward for ${rolosData.recipient.StaffName}`,
                 html: `<h1 style="text-align: center">ROLO - Upward</h1><br><p><strong>Employee Name: </strong>${rolosData.recipient.StaffName}</p><p><strong>Project: </strong>${rolosData.project}</p><p><strong>How did ${rolosData.recipient.StaffName} do on the project? </strong>${ratingString}</p><p><strong>Submitted by: </strong>${rolosData.sender.StaffName}</p><p><strong>Today's Date: </strong>${d}</p><br><br><h2 style="text-align: center">Retain</h2><p>${rolosData.retain}</p><br><h2 style="text-align: center">Lose</h2><p>${rolosData.lose}</p>`
@@ -140,7 +169,7 @@ const ROLOS = async (rolosData) => {
             pooledTransporter.sendMail({
                 from: process.env.EM_USER,
                 to: "zealhr@bmss.com",
-                cc: `${hrLeaderInfo.StaffEMail}; ${rolosData.recipient.StaffEMail}`,
+                cc: `${ccString}; ${rolosData.recipient.StaffEMail}`,
                 bcc: rolosData.sender.StaffEMail,
                 subject: `ROLO - Downward for ${rolosData.recipient.StaffName}`,
                 html: `<h1 style="text-align: center">ROLO - Downward</h1><br><p><strong>Employee Name: </strong>${rolosData.recipient.StaffName}</p><p><strong>Project: </strong>${rolosData.project}</p><p><strong>How did ${rolosData.recipient.StaffName} do on the project? </strong>${ratingString}</p><p><strong>Submitted by: </strong>${rolosData.sender.StaffName}</p><p><strong>Today's Date: </strong>${d}</p><br><br><h2 style="text-align: center">Retain</h2><p>${rolosData.retain}</p><br><h2 style="text-align: center">Lose</h2><p>${rolosData.lose}</p>`

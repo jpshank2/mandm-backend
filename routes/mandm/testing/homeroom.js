@@ -32,6 +32,9 @@ const GET_HOMEROOM_MEMBERS = (req, res) => {
         case "Rachel Bowers":
             leader = "Michael Brand"
             break;
+        case "Rebecca Kitchen":
+            leader = "Ross Mendheim"
+            break;
         default:
             leader = req.body.userName
             break;
